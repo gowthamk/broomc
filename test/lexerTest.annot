@@ -1,0 +1,1247 @@
+"lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+type(
+  string -> Parser.token
+)
+ident(
+  def token "lexerTest.ml" 29 1264 1264 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 26 1212 1222 "lexerTest.ml" 26 1212 1223
+type(
+  string
+)
+ident(
+  def s "lexerTest.ml" 27 1226 1228 "lexerTest.ml" 27 1226 1262
+)
+"lexerTest.ml" 27 1226 1228 "lexerTest.ml" 27 1226 1239
+type(
+  Lexer.L.lexbuf -> Parser.token
+)
+ident(
+  ext_ref Lexer.token
+)
+"lexerTest.ml" 27 1226 1241 "lexerTest.ml" 27 1226 1259
+type(
+  string -> Lexer.L.lexbuf
+)
+ident(
+  ext_ref Lexing.from_string
+)
+"lexerTest.ml" 27 1226 1260 "lexerTest.ml" 27 1226 1261
+type(
+  string
+)
+ident(
+  int_ref s "lexerTest.ml" 26 1212 1222 "lexerTest.ml" 26 1212 1223
+)
+"lexerTest.ml" 27 1226 1240 "lexerTest.ml" 27 1226 1262
+call(
+  stack
+)
+type(
+  Lexer.L.lexbuf
+)
+"lexerTest.ml" 27 1226 1228 "lexerTest.ml" 27 1226 1262
+call(
+  tail
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 29 1264 1268 "lexerTest.ml" 29 1264 1276
+type(
+  OUnit.test
+)
+ident(
+  def eof_test "lexerTest.ml" 34 1348 1348 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 30 1279 1281 "lexerTest.ml" 30 1279 1286
+type(
+  string
+)
+"lexerTest.ml" 30 1279 1287 "lexerTest.ml" 30 1279 1290
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 31 1297 1305 "lexerTest.ml" 31 1297 1307
+type(
+  unit
+)
+"lexerTest.ml" 31 1297 1311 "lexerTest.ml" 31 1297 1323
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 31 1297 1324 "lexerTest.ml" 31 1297 1329
+type(
+  Parser.token
+)
+"lexerTest.ml" 31 1297 1331 "lexerTest.ml" 31 1297 1336
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 31 1297 1337 "lexerTest.ml" 31 1297 1339
+type(
+  string
+)
+"lexerTest.ml" 31 1297 1330 "lexerTest.ml" 31 1297 1340
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 31 1297 1311 "lexerTest.ml" 31 1297 1340
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 30 1279 1291 "lexerTest.ml" 32 1341 1346
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 30 1279 1281 "lexerTest.ml" 32 1341 1346
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 34 1348 1352 "lexerTest.ml" 34 1348 1367
+type(
+  OUnit.test
+)
+ident(
+  def whitespace_test "lexerTest.ml" 39 1453 1453 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 35 1370 1372 "lexerTest.ml" 35 1370 1384
+type(
+  string
+)
+"lexerTest.ml" 35 1370 1385 "lexerTest.ml" 35 1370 1388
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 36 1395 1403 "lexerTest.ml" 36 1395 1405
+type(
+  unit
+)
+"lexerTest.ml" 36 1395 1409 "lexerTest.ml" 36 1395 1421
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 36 1395 1422 "lexerTest.ml" 36 1395 1427
+type(
+  Parser.token
+)
+"lexerTest.ml" 36 1395 1429 "lexerTest.ml" 36 1395 1434
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 36 1395 1435 "lexerTest.ml" 36 1395 1444
+type(
+  string
+)
+"lexerTest.ml" 36 1395 1428 "lexerTest.ml" 36 1395 1445
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 36 1395 1409 "lexerTest.ml" 36 1395 1445
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 35 1370 1389 "lexerTest.ml" 37 1446 1451
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 35 1370 1372 "lexerTest.ml" 37 1446 1451
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 39 1453 1457 "lexerTest.ml" 39 1453 1468
+type(
+  OUnit.test
+)
+ident(
+  def lparen_test "lexerTest.ml" 44 1547 1547 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 40 1471 1473 "lexerTest.ml" 40 1471 1481
+type(
+  string
+)
+"lexerTest.ml" 40 1471 1482 "lexerTest.ml" 40 1471 1485
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 41 1492 1500 "lexerTest.ml" 41 1492 1502
+type(
+  unit
+)
+"lexerTest.ml" 41 1492 1506 "lexerTest.ml" 41 1492 1518
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 41 1492 1519 "lexerTest.ml" 41 1492 1527
+type(
+  Parser.token
+)
+"lexerTest.ml" 41 1492 1529 "lexerTest.ml" 41 1492 1534
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 41 1492 1535 "lexerTest.ml" 41 1492 1538
+type(
+  string
+)
+"lexerTest.ml" 41 1492 1528 "lexerTest.ml" 41 1492 1539
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 41 1492 1506 "lexerTest.ml" 41 1492 1539
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 40 1471 1486 "lexerTest.ml" 42 1540 1545
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 40 1471 1473 "lexerTest.ml" 42 1540 1545
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 44 1547 1551 "lexerTest.ml" 44 1547 1562
+type(
+  OUnit.test
+)
+ident(
+  def rparen_test "lexerTest.ml" 49 1640 1640 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 45 1565 1566 "lexerTest.ml" 45 1565 1574
+type(
+  string
+)
+"lexerTest.ml" 45 1565 1575 "lexerTest.ml" 45 1565 1578
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 46 1585 1593 "lexerTest.ml" 46 1585 1595
+type(
+  unit
+)
+"lexerTest.ml" 46 1585 1599 "lexerTest.ml" 46 1585 1611
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 46 1585 1612 "lexerTest.ml" 46 1585 1620
+type(
+  Parser.token
+)
+"lexerTest.ml" 46 1585 1622 "lexerTest.ml" 46 1585 1627
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 46 1585 1628 "lexerTest.ml" 46 1585 1631
+type(
+  string
+)
+"lexerTest.ml" 46 1585 1621 "lexerTest.ml" 46 1585 1632
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 46 1585 1599 "lexerTest.ml" 46 1585 1632
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 45 1565 1579 "lexerTest.ml" 47 1633 1638
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 45 1565 1566 "lexerTest.ml" 47 1633 1638
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 49 1640 1644 "lexerTest.ml" 49 1640 1655
+type(
+  OUnit.test
+)
+ident(
+  def lbrace_test "lexerTest.ml" 54 1734 1734 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 50 1658 1660 "lexerTest.ml" 50 1658 1668
+type(
+  string
+)
+"lexerTest.ml" 50 1658 1669 "lexerTest.ml" 50 1658 1672
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 51 1679 1687 "lexerTest.ml" 51 1679 1689
+type(
+  unit
+)
+"lexerTest.ml" 51 1679 1693 "lexerTest.ml" 51 1679 1705
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 51 1679 1706 "lexerTest.ml" 51 1679 1714
+type(
+  Parser.token
+)
+"lexerTest.ml" 51 1679 1716 "lexerTest.ml" 51 1679 1721
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 51 1679 1722 "lexerTest.ml" 51 1679 1725
+type(
+  string
+)
+"lexerTest.ml" 51 1679 1715 "lexerTest.ml" 51 1679 1726
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 51 1679 1693 "lexerTest.ml" 51 1679 1726
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 50 1658 1673 "lexerTest.ml" 52 1727 1732
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 50 1658 1660 "lexerTest.ml" 52 1727 1732
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 54 1734 1738 "lexerTest.ml" 54 1734 1749
+type(
+  OUnit.test
+)
+ident(
+  def rbrace_test "lexerTest.ml" 59 1828 1828 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 55 1752 1754 "lexerTest.ml" 55 1752 1762
+type(
+  string
+)
+"lexerTest.ml" 55 1752 1763 "lexerTest.ml" 55 1752 1766
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 56 1773 1781 "lexerTest.ml" 56 1773 1783
+type(
+  unit
+)
+"lexerTest.ml" 56 1773 1787 "lexerTest.ml" 56 1773 1799
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 56 1773 1800 "lexerTest.ml" 56 1773 1808
+type(
+  Parser.token
+)
+"lexerTest.ml" 56 1773 1810 "lexerTest.ml" 56 1773 1815
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 56 1773 1816 "lexerTest.ml" 56 1773 1819
+type(
+  string
+)
+"lexerTest.ml" 56 1773 1809 "lexerTest.ml" 56 1773 1820
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 56 1773 1787 "lexerTest.ml" 56 1773 1820
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 55 1752 1767 "lexerTest.ml" 57 1821 1826
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 55 1752 1754 "lexerTest.ml" 57 1821 1826
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 59 1828 1832 "lexerTest.ml" 59 1828 1843
+type(
+  OUnit.test
+)
+ident(
+  def period_test "lexerTest.ml" 64 1922 1922 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 60 1846 1848 "lexerTest.ml" 60 1846 1856
+type(
+  string
+)
+"lexerTest.ml" 60 1846 1857 "lexerTest.ml" 60 1846 1860
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 61 1867 1875 "lexerTest.ml" 61 1867 1877
+type(
+  unit
+)
+"lexerTest.ml" 61 1867 1881 "lexerTest.ml" 61 1867 1893
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 61 1867 1894 "lexerTest.ml" 61 1867 1902
+type(
+  Parser.token
+)
+"lexerTest.ml" 61 1867 1904 "lexerTest.ml" 61 1867 1909
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 61 1867 1910 "lexerTest.ml" 61 1867 1913
+type(
+  string
+)
+"lexerTest.ml" 61 1867 1903 "lexerTest.ml" 61 1867 1914
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 61 1867 1881 "lexerTest.ml" 61 1867 1914
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 60 1846 1861 "lexerTest.ml" 62 1915 1920
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 60 1846 1848 "lexerTest.ml" 62 1915 1920
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 64 1922 1926 "lexerTest.ml" 64 1922 1936
+type(
+  OUnit.test
+)
+ident(
+  def comma_test "lexerTest.ml" 69 2013 2013 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 65 1939 1941 "lexerTest.ml" 65 1939 1948
+type(
+  string
+)
+"lexerTest.ml" 65 1939 1949 "lexerTest.ml" 65 1939 1952
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 66 1959 1967 "lexerTest.ml" 66 1959 1969
+type(
+  unit
+)
+"lexerTest.ml" 66 1959 1973 "lexerTest.ml" 66 1959 1985
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 66 1959 1986 "lexerTest.ml" 66 1959 1993
+type(
+  Parser.token
+)
+"lexerTest.ml" 66 1959 1995 "lexerTest.ml" 66 1959 2000
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 66 1959 2001 "lexerTest.ml" 66 1959 2004
+type(
+  string
+)
+"lexerTest.ml" 66 1959 1994 "lexerTest.ml" 66 1959 2005
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 66 1959 1973 "lexerTest.ml" 66 1959 2005
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 65 1939 1953 "lexerTest.ml" 67 2006 2011
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 65 1939 1941 "lexerTest.ml" 67 2006 2011
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 69 2013 2017 "lexerTest.ml" 69 2013 2031
+type(
+  OUnit.test
+)
+ident(
+  def semicolon_test "lexerTest.ml" 74 2116 2116 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 70 2034 2036 "lexerTest.ml" 70 2034 2047
+type(
+  string
+)
+"lexerTest.ml" 70 2034 2048 "lexerTest.ml" 70 2034 2051
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 71 2058 2066 "lexerTest.ml" 71 2058 2068
+type(
+  unit
+)
+"lexerTest.ml" 71 2058 2072 "lexerTest.ml" 71 2058 2084
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 71 2058 2085 "lexerTest.ml" 71 2058 2096
+type(
+  Parser.token
+)
+"lexerTest.ml" 71 2058 2098 "lexerTest.ml" 71 2058 2103
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 71 2058 2104 "lexerTest.ml" 71 2058 2107
+type(
+  string
+)
+"lexerTest.ml" 71 2058 2097 "lexerTest.ml" 71 2058 2108
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 71 2058 2072 "lexerTest.ml" 71 2058 2108
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 70 2034 2052 "lexerTest.ml" 72 2109 2114
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 70 2034 2036 "lexerTest.ml" 72 2109 2114
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 74 2116 2120 "lexerTest.ml" 74 2116 2131
+type(
+  OUnit.test
+)
+ident(
+  def assign_test "lexerTest.ml" 79 2210 2210 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 75 2134 2136 "lexerTest.ml" 75 2134 2144
+type(
+  string
+)
+"lexerTest.ml" 75 2134 2145 "lexerTest.ml" 75 2134 2148
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 76 2155 2163 "lexerTest.ml" 76 2155 2165
+type(
+  unit
+)
+"lexerTest.ml" 76 2155 2169 "lexerTest.ml" 76 2155 2181
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 76 2155 2182 "lexerTest.ml" 76 2155 2190
+type(
+  Parser.token
+)
+"lexerTest.ml" 76 2155 2192 "lexerTest.ml" 76 2155 2197
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 76 2155 2198 "lexerTest.ml" 76 2155 2201
+type(
+  string
+)
+"lexerTest.ml" 76 2155 2191 "lexerTest.ml" 76 2155 2202
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 76 2155 2169 "lexerTest.ml" 76 2155 2202
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 75 2134 2149 "lexerTest.ml" 77 2203 2208
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 75 2134 2136 "lexerTest.ml" 77 2203 2208
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 79 2210 2214 "lexerTest.ml" 79 2210 2224
+type(
+  OUnit.test
+)
+ident(
+  def ident_test "lexerTest.ml" 87 2465 2465 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 80 2227 2229 "lexerTest.ml" 80 2227 2236
+type(
+  string
+)
+"lexerTest.ml" 80 2227 2237 "lexerTest.ml" 80 2227 2240
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 81 2247 2255 "lexerTest.ml" 81 2247 2257
+type(
+  unit
+)
+"lexerTest.ml" 81 2247 2261 "lexerTest.ml" 81 2247 2273
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 81 2247 2283 "lexerTest.ml" 81 2247 2287
+type(
+  string
+)
+"lexerTest.ml" 81 2247 2274 "lexerTest.ml" 81 2247 2288
+type(
+  Parser.token
+)
+"lexerTest.ml" 81 2247 2290 "lexerTest.ml" 81 2247 2295
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 81 2247 2296 "lexerTest.ml" 81 2247 2300
+type(
+  string
+)
+"lexerTest.ml" 81 2247 2289 "lexerTest.ml" 81 2247 2301
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 81 2247 2261 "lexerTest.ml" 81 2247 2301
+call(
+  stack
+)
+type(
+  unit
+)
+"lexerTest.ml" 82 2303 2309 "lexerTest.ml" 82 2303 2321
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 82 2303 2331 "lexerTest.ml" 82 2303 2335
+type(
+  string
+)
+"lexerTest.ml" 82 2303 2322 "lexerTest.ml" 82 2303 2336
+type(
+  Parser.token
+)
+"lexerTest.ml" 82 2303 2338 "lexerTest.ml" 82 2303 2343
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 82 2303 2344 "lexerTest.ml" 82 2303 2348
+type(
+  string
+)
+"lexerTest.ml" 82 2303 2337 "lexerTest.ml" 82 2303 2349
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 82 2303 2309 "lexerTest.ml" 82 2303 2349
+call(
+  stack
+)
+type(
+  unit
+)
+"lexerTest.ml" 83 2351 2357 "lexerTest.ml" 83 2351 2369
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 83 2351 2379 "lexerTest.ml" 83 2351 2384
+type(
+  string
+)
+"lexerTest.ml" 83 2351 2370 "lexerTest.ml" 83 2351 2385
+type(
+  Parser.token
+)
+"lexerTest.ml" 83 2351 2387 "lexerTest.ml" 83 2351 2392
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 83 2351 2393 "lexerTest.ml" 83 2351 2398
+type(
+  string
+)
+"lexerTest.ml" 83 2351 2386 "lexerTest.ml" 83 2351 2399
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 83 2351 2357 "lexerTest.ml" 83 2351 2399
+call(
+  stack
+)
+type(
+  unit
+)
+"lexerTest.ml" 84 2401 2407 "lexerTest.ml" 84 2401 2419
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 84 2401 2429 "lexerTest.ml" 84 2401 2438
+type(
+  string
+)
+"lexerTest.ml" 84 2401 2420 "lexerTest.ml" 84 2401 2439
+type(
+  Parser.token
+)
+"lexerTest.ml" 84 2401 2441 "lexerTest.ml" 84 2401 2446
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 84 2401 2447 "lexerTest.ml" 84 2401 2456
+type(
+  string
+)
+"lexerTest.ml" 84 2401 2440 "lexerTest.ml" 84 2401 2457
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 84 2401 2407 "lexerTest.ml" 84 2401 2457
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 83 2351 2357 "lexerTest.ml" 84 2401 2457
+type(
+  unit
+)
+"lexerTest.ml" 82 2303 2309 "lexerTest.ml" 84 2401 2457
+type(
+  unit
+)
+"lexerTest.ml" 81 2247 2261 "lexerTest.ml" 84 2401 2457
+type(
+  unit
+)
+"lexerTest.ml" 80 2227 2241 "lexerTest.ml" 85 2458 2463
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 80 2227 2229 "lexerTest.ml" 85 2458 2463
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 87 2465 2469 "lexerTest.ml" 87 2465 2481
+type(
+  OUnit.test
+)
+ident(
+  def keyword_test "lexerTest.ml" 92 2603 2603 "lexerTest.ml" 1 0 -1
+)
+"lexerTest.ml" 88 2484 2486 "lexerTest.ml" 88 2484 2500
+type(
+  string
+)
+"lexerTest.ml" 88 2484 2501 "lexerTest.ml" 88 2484 2504
+type(
+  string -> OUnit.test_fun -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >:: )
+)
+"lexerTest.ml" 89 2511 2519 "lexerTest.ml" 89 2511 2521
+type(
+  unit
+)
+"lexerTest.ml" 89 2511 2525 "lexerTest.ml" 89 2511 2537
+type(
+  (string -> Parser.token -> unit) ->
+  (string, Parser.token) Hashtbl.t -> unit
+)
+ident(
+  ext_ref Hashtbl.iter
+)
+"lexerTest.ml" 89 2511 2543 "lexerTest.ml" 89 2511 2544
+type(
+  string
+)
+ident(
+  def k "lexerTest.ml" 89 2511 2545 "lexerTest.ml" 89 2511 2574
+)
+"lexerTest.ml" 89 2511 2545 "lexerTest.ml" 89 2511 2546
+type(
+  Parser.token
+)
+ident(
+  def v "lexerTest.ml" 89 2511 2550 "lexerTest.ml" 89 2511 2574
+)
+"lexerTest.ml" 89 2511 2550 "lexerTest.ml" 89 2511 2562
+type(
+  ?cmp:(Parser.token -> Parser.token -> bool) ->
+  ?printer:(Parser.token -> string) ->
+  ?pp_diff:(Format.formatter -> Parser.token * Parser.token -> unit) ->
+  ?msg:string -> Parser.token -> Parser.token -> unit
+)
+ident(
+  ext_ref OUnit.assert_equal
+)
+"lexerTest.ml" 89 2511 2563 "lexerTest.ml" 89 2511 2564
+type(
+  Parser.token
+)
+ident(
+  int_ref v "lexerTest.ml" 89 2511 2545 "lexerTest.ml" 89 2511 2546
+)
+"lexerTest.ml" 89 2511 2566 "lexerTest.ml" 89 2511 2571
+type(
+  string -> Parser.token
+)
+ident(
+  int_ref token "lexerTest.ml" 26 1212 1216 "lexerTest.ml" 26 1212 1221
+)
+"lexerTest.ml" 89 2511 2572 "lexerTest.ml" 89 2511 2573
+type(
+  string
+)
+ident(
+  int_ref k "lexerTest.ml" 89 2511 2543 "lexerTest.ml" 89 2511 2544
+)
+"lexerTest.ml" 89 2511 2565 "lexerTest.ml" 89 2511 2574
+call(
+  stack
+)
+type(
+  Parser.token
+)
+"lexerTest.ml" 89 2511 2550 "lexerTest.ml" 89 2511 2574
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 89 2511 2538 "lexerTest.ml" 89 2511 2575
+type(
+  string -> Parser.token -> unit
+)
+"lexerTest.ml" 89 2511 2576 "lexerTest.ml" 89 2511 2595
+type(
+  (string, Parser.token) Hashtbl.t
+)
+ident(
+  ext_ref Lexer.keyword_table
+)
+"lexerTest.ml" 89 2511 2525 "lexerTest.ml" 89 2511 2595
+call(
+  tail
+)
+type(
+  unit
+)
+"lexerTest.ml" 88 2484 2505 "lexerTest.ml" 90 2596 2601
+type(
+  OUnit.test_fun
+)
+"lexerTest.ml" 88 2484 2486 "lexerTest.ml" 90 2596 2601
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 93 2612 2614 "lexerTest.ml" 93 2612 2630
+type(
+  ?arg_specs:(Arg.key * Arg.spec * Arg.doc) list ->
+  ?set_verbose:(bool -> unit) -> OUnit.test -> OUnit.test_results
+)
+ident(
+  ext_ref OUnit.run_test_tt_main
+)
+"lexerTest.ml" 94 2637 2641 "lexerTest.ml" 94 2637 2654
+type(
+  (unit, out_channel, unit) format -> unit
+)
+ident(
+  ext_ref Printf.printf
+)
+"lexerTest.ml" 94 2637 2655 "lexerTest.ml" 94 2637 2669
+type(
+  (unit, out_channel, unit) format
+)
+"lexerTest.ml" 94 2637 2641 "lexerTest.ml" 94 2637 2669
+call(
+  stack
+)
+type(
+  unit
+)
+"lexerTest.ml" 95 2671 2675 "lexerTest.ml" 95 2671 2682
+type(
+  string
+)
+"lexerTest.ml" 95 2671 2683 "lexerTest.ml" 95 2671 2687
+type(
+  string -> OUnit.test list -> OUnit.test
+)
+ident(
+  ext_ref OUnit.( >::: )
+)
+"lexerTest.ml" 96 2690 2696 "lexerTest.ml" 96 2690 2711
+type(
+  OUnit.test
+)
+ident(
+  int_ref whitespace_test "lexerTest.ml" 34 1348 1352 "lexerTest.ml" 34 1348 1367
+)
+"lexerTest.ml" 97 2712 2718 "lexerTest.ml" 97 2712 2726
+type(
+  OUnit.test
+)
+ident(
+  int_ref eof_test "lexerTest.ml" 29 1264 1268 "lexerTest.ml" 29 1264 1276
+)
+"lexerTest.ml" 98 2727 2733 "lexerTest.ml" 98 2727 2744
+type(
+  OUnit.test
+)
+ident(
+  int_ref lparen_test "lexerTest.ml" 39 1453 1457 "lexerTest.ml" 39 1453 1468
+)
+"lexerTest.ml" 99 2745 2751 "lexerTest.ml" 99 2745 2762
+type(
+  OUnit.test
+)
+ident(
+  int_ref rparen_test "lexerTest.ml" 44 1547 1551 "lexerTest.ml" 44 1547 1562
+)
+"lexerTest.ml" 100 2763 2769 "lexerTest.ml" 100 2763 2780
+type(
+  OUnit.test
+)
+ident(
+  int_ref lbrace_test "lexerTest.ml" 49 1640 1644 "lexerTest.ml" 49 1640 1655
+)
+"lexerTest.ml" 101 2781 2787 "lexerTest.ml" 101 2781 2798
+type(
+  OUnit.test
+)
+ident(
+  int_ref rbrace_test "lexerTest.ml" 54 1734 1738 "lexerTest.ml" 54 1734 1749
+)
+"lexerTest.ml" 102 2799 2805 "lexerTest.ml" 102 2799 2819
+type(
+  OUnit.test
+)
+ident(
+  int_ref semicolon_test "lexerTest.ml" 69 2013 2017 "lexerTest.ml" 69 2013 2031
+)
+"lexerTest.ml" 103 2820 2826 "lexerTest.ml" 103 2820 2837
+type(
+  OUnit.test
+)
+ident(
+  int_ref period_test "lexerTest.ml" 59 1828 1832 "lexerTest.ml" 59 1828 1843
+)
+"lexerTest.ml" 104 2838 2844 "lexerTest.ml" 104 2838 2854
+type(
+  OUnit.test
+)
+ident(
+  int_ref comma_test "lexerTest.ml" 64 1922 1926 "lexerTest.ml" 64 1922 1936
+)
+"lexerTest.ml" 105 2855 2861 "lexerTest.ml" 105 2855 2872
+type(
+  OUnit.test
+)
+ident(
+  int_ref assign_test "lexerTest.ml" 74 2116 2120 "lexerTest.ml" 74 2116 2131
+)
+"lexerTest.ml" 106 2873 2879 "lexerTest.ml" 106 2873 2889
+type(
+  OUnit.test
+)
+ident(
+  int_ref ident_test "lexerTest.ml" 79 2210 2214 "lexerTest.ml" 79 2210 2224
+)
+"lexerTest.ml" 107 2890 2896 "lexerTest.ml" 107 2890 2908
+type(
+  OUnit.test
+)
+ident(
+  int_ref keyword_test "lexerTest.ml" 87 2465 2469 "lexerTest.ml" 87 2465 2481
+)
+"lexerTest.ml" 95 2671 2688 "lexerTest.ml" 108 2909 2914
+type(
+  OUnit.test list
+)
+"lexerTest.ml" 95 2671 2675 "lexerTest.ml" 108 2909 2914
+call(
+  stack
+)
+type(
+  OUnit.test
+)
+"lexerTest.ml" 93 2612 2631 "lexerTest.ml" 109 2915 2920
+type(
+  OUnit.test
+)
+"lexerTest.ml" 93 2612 2614 "lexerTest.ml" 109 2915 2920
+call(
+  stack
+)
+type(
+  OUnit.test_results
+)

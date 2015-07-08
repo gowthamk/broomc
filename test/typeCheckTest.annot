@@ -1,0 +1,4 @@
+"typeCheckTest.ml" 28 1236 1238 "typeCheckTest.ml" 28 1236 1240
+type(
+  unit
+)
