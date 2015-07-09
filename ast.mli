@@ -27,6 +27,7 @@ sig
          | Tyvar of Tyvar.t
          | Unknown 
   val mkApp : Tycon.t * t list  -> t
+  val var : Tyvar.t -> t
   val equal : t * t -> bool
 end
 

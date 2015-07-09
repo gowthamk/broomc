@@ -41,6 +41,7 @@ struct
          | Unknown 
 
   let mkApp (x,y) = ConApp (x,y)
+  let var v = Tyvar v
   let rec equal = function
     | (Int,Int) | (Bool,Bool) | (Object,Object) -> true
     | (ConApp (tycon1,typs1), ConApp (tycon2,typs2)) -> 

@@ -56,6 +56,9 @@ rule token = parse
       Hashtbl.find keyword_table ident
     with
       Not_found -> T_ident ident }
+| ("'")(letter | '_') (letter | digit | '_')*
+  {let ident = L.lexeme lexbuf in
+      T_tyvar ident}
 |  _
   { error (P.sprintf "unknown token %s near characters" (L.lexeme lexbuf)) lexbuf }
 

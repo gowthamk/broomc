@@ -43,6 +43,7 @@
 %token T_comma
 %token T_assign
 %token <string> T_ident
+%token <string> T_tyvar
 %token T_keyword_class
 %token T_keyword_extends
 %token T_keyword_new
@@ -102,6 +103,8 @@ typ:
     {Ast.Type.Bool}
  | classtyp 
     {$1}
+ | tyvar
+    {Ast.Type.var $1}
 
 var:
  | T_ident {Ast.Var.fromString $1}
@@ -118,9 +121,12 @@ typseq:
  | typ
    {[$1]}
 
+tyvar:
+ | T_tyvar {Tyvar.fromString $1} 
+
 tyvardec: 
- | T_ident T_keyword_extends classtyp
-    {(Tyvar.fromString $1, $3)}
+ | tyvar T_keyword_extends classtyp
+    {($1, $3)}
 
 tyvardecseq :
  | tyvardec T_comma tyvardecseq
