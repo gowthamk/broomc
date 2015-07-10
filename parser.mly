@@ -51,6 +51,7 @@
 %token T_keyword_return
 %token T_keyword_int
 %token T_keyword_bool
+%token T_keyword_void
 %right T_comma
 
 /* Starting non-terminal is prog. Its type is Ast.Class.t list */
@@ -101,6 +102,8 @@ typ:
     {Ast.Type.Int}
  | T_keyword_bool
     {Ast.Type.Bool}
+ | T_keyword_void
+    {Ast.Type.Unit}
  | classtyp 
     {$1}
  | tyvar

@@ -35,7 +35,7 @@ end
 
 module Type =
 struct
-  type t = Int | Bool | Object
+  type t = Int | Bool | Object | Unit
          | ConApp of Tycon.t * t list
          | Tyvar of Tyvar.t
          | Unknown 
@@ -43,12 +43,23 @@ struct
   let mkApp (x,y) = ConApp (x,y)
   let var v = Tyvar v
   let rec equal = function
-    | (Int,Int) | (Bool,Bool) | (Object,Object) -> true
+    | (Int,Int) | (Bool,Bool) | (Object,Object) | (Unit,Unit) -> true
     | (ConApp (tycon1,typs1), ConApp (tycon2,typs2)) -> 
         Tycon.equal (tycon1,tycon2) && 
         List.for_all2 (fun ty1 ty2 -> equal (ty1,ty2)) typs1 typs2
     | (Tyvar tyv1,Tyvar tyv2) -> Tyvar.equal (tyv1,tyv2)
     | _ -> false
+  let rec mapTyvars f t = match t with
+    | Int | Bool | Object | Unknown | Unit -> t
+    | Tyvar v -> f v
+    | ConApp (tycon,tyargs) -> 
+        ConApp (tycon,List.map (mapTyvars f) tyargs)
+  let toString = function
+    | Int -> "int" | Bool -> "bool" | Object -> "Object"
+    | Unknown -> "?Unknown" | Unit -> "void"
+    | Tyvar v -> Tyvar.toString v
+    | ConApp (tycon,tyargs) -> (Tycon.toString tycon)^"<"
+              ^("...")^">"
 end
 
 module Expr =
@@ -62,6 +73,7 @@ struct
   | New of Tycon.t * Type.t list * t list
   and t = T of node * Type.t
   let node (T (n,_)) = n
+  let typ (T (_,t)) = t
   let make (n,ty) = T (n,ty)
 end
 

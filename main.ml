@@ -1,24 +1,34 @@
-(*
- * Copyright (c) 2014 Takahisa Watanabe <linerlock@outlook.com> All rights reserved.
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *)
+open Ast
+module CT = Map.Make (struct
+                        type t = Tycon.t
+                        let compare = compare
+                      end)
+module TypeCheck = TypeCheck.Make (struct
+                                    module CT = CT
+                                   end)
+let non_existence_type = Type.Unknown
+let base_klass_tycon = Tycon.make @@ Id.fromString "Object"
+let base_klass_type = Type.mkApp (base_klass_tycon,[])
+let base_klass = Class.make
+  ~tycon: base_klass_tycon
+  ~tyvars: []
+  ~super: non_existence_type
+  ~fields: []
+  ~ctors: []
+  ~methods: []
+
+let makeClassTable ks =
+  let ct = CT.singleton base_klass_tycon base_klass in
+    List.fold_left 
+      (fun ct k ->
+         begin
+           let x = Class.tycon k in 
+             if CT.mem x ct then 
+               failwith @@ "The class"^(Tycon.toString x)
+                  ^"has already been defined.\n" 
+             else ();
+           CT.add x k ct
+         end) ct ks
 
 let _ =
   let files = ref [] in
@@ -31,7 +41,10 @@ let _ =
     let channel = open_in f in
     try
       let lexbuff = Lexing.from_channel channel in
-      ignore (Parser.prog Lexer.token lexbuff)
+      let classes = Parser.prog Lexer.token lexbuff in
+      let ct = makeClassTable classes in
+      let ct' = TypeCheck.doIt ct in
+        ()
     with
       e -> close_in channel; raise e
   end !files

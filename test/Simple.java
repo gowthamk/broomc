@@ -6,6 +6,9 @@ class Simple extends Object
     this.x = x;
     this.y = y;
   }
-  Object swap() {
+  void swap() {
+    Object tmp = this.x;
+    this.x = this.y;
+    this.y = tmp;
   }
 }

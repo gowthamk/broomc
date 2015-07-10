@@ -10,6 +10,7 @@
     ;("new"     , T_keyword_new)
     ;("super"   , T_keyword_super)
     ;("return"  , T_keyword_return)
+    ;("void"     , T_keyword_void)
     ;("int"     , T_keyword_int)
     ;("bool"    , T_keyword_bool)]
 

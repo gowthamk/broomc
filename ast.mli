@@ -22,13 +22,15 @@ end
 
 module Type : 
 sig
-  type t = Int | Bool | Object
+  type t = Int | Bool | Object | Unit
          | ConApp of Tycon.t * t list
          | Tyvar of Tyvar.t
          | Unknown 
   val mkApp : Tycon.t * t list  -> t
   val var : Tyvar.t -> t
   val equal : t * t -> bool
+  val mapTyvars : (Tyvar.t -> t) -> t -> t
+  val toString : t -> string
 end
 
 module Expr : 
@@ -42,6 +44,7 @@ sig
   | MethodCall of t * MethodName.t * t list
   | New of Tycon.t * Type.t list * t list
   val node : t -> node
+  val typ : t -> Type.t
   val make : node * Type.t -> t
 end
 
