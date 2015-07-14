@@ -1,10 +1,13 @@
-class Pair extends Object
+class Pair<'a extends Object, 'b extends Object> extends Object
 {
-  Object fst;
-  Object snd;
-  Pair(Object fst, Object snd) {
+  'a fst;
+  'b snd;
+  Pair('a fst, 'b snd) {
     this.fst = fst;
     this.snd = snd;
+  }
+  'a getFst () {
+    this.fst;
   }
   void swap() {
     Object temp = this.fst;

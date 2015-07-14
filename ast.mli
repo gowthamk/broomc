@@ -53,7 +53,7 @@ sig
   type t = 
       VarDec of Type.t * Var.t * Expr.t
     | Assn of Var.t * Expr.t
-    | FieldSet of Expr.t * Field.t * Expr.t
+    | FieldSet of Expr.t * Expr.t
     | Expr of Expr.t
     | Seq of t list
     | Seq2 of t * t
@@ -100,4 +100,5 @@ sig
   val fields : t -> (Field.t * Type.t) list
   val ctors : t -> Con.t list
   val methods : t -> Method.t list
+  val print : t -> unit
 end

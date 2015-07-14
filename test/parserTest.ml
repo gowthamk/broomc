@@ -50,6 +50,12 @@ let fstVar = Var.fromString "fst"
 let sndVar = Var.fromString "snd"
 let fstExpr = Expr.make (Expr.Var fstVar, Type.Unknown)
 let sndExpr = Expr.make (Expr.Var sndVar, Type.Unknown)
+let thisFstExpr = Expr.make (Expr.FieldGet (thisExpr,
+                                            Field.fromString "fst"),
+                             Type.Unknown)
+let thisSndExpr = Expr.make (Expr.FieldGet (thisExpr,
+                                            Field.fromString "snd"),
+                             Type.Unknown)
 
 let expected =
   Class.make 
@@ -60,11 +66,9 @@ let expected =
                 ~tycon: pairTycon
                 ~params: [(fstVar, Type.Object); 
                           (sndVar, Type.Object)]
-                ~body: (Stmt.Seq [Stmt.FieldSet(thisExpr, 
-                                               Field.fromString "fst", 
+                ~body: (Stmt.Seq [Stmt.FieldSet(thisFstExpr, 
                                                fstExpr);
-                                  Stmt.FieldSet(thisExpr,
-                                               Field.fromString "snd", 
+                                  Stmt.FieldSet(thisSndExpr, 
                                                sndExpr)])]
     ~fields: [(Field.fromString "fst", Type.Object);
               (Field.fromString "snd", Type.Object)]
@@ -76,13 +80,11 @@ let expected =
                                                 Expr.make (Expr.FieldGet (thisExpr,
                                                                           Field.fromString "fst"),
                                                            Type.Unknown));
-                                   Stmt.FieldSet (thisExpr,
-                                                  Field.fromString "fst",
+                                   Stmt.FieldSet (thisFstExpr,
                                                   Expr.make (Expr.FieldGet (thisExpr,
                                                                             Field.fromString "snd"),
                                                            Type.Unknown));
-                                   Stmt.FieldSet (thisExpr,
-                                                  Field.fromString "snd",
+                                   Stmt.FieldSet (thisSndExpr,
                                                   Expr.make (Expr.Var (Var.fromString "temp"),
                                                              Type.Unknown))])
                   ~ret_type: pairType)]

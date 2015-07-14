@@ -44,7 +44,13 @@ let _ =
       let classes = Parser.prog Lexer.token lexbuff in
       let ct = makeClassTable classes in
       let ct' = TypeCheck.doIt ct in
-        ()
+        begin
+          CT.iter (fun tycon k -> 
+            begin
+              Class.print k;
+              Format.printf "@\n";
+            end ) ct';
+        end
     with
       e -> close_in channel; raise e
   end !files

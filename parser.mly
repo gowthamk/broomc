@@ -239,6 +239,7 @@ atomstmt:
   | var expr
       {Ast.Stmt.Assn ($1,$2)}
   | expr T_period field T_assign expr
-      {Ast.Stmt.FieldSet ($1,$3,$5)}
+      {let lhsExp = Expr.make (Expr.FieldGet ($1,$3), Type.Unknown) in
+        Ast.Stmt.FieldSet (lhsExp,$5)}
   | expr
       {Ast.Stmt.Expr $1}

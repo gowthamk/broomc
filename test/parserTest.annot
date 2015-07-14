@@ -534,7 +534,7 @@ type(
   Ast.Expr.t
 )
 ident(
-  def sndExpr "parserTest.ml" 54 1932 1932 "parserTest.ml" 1 0 -1
+  def sndExpr "parserTest.ml" 53 1931 1931 "parserTest.ml" 1 0 -1
 )
 "parserTest.ml" 52 1875 1889 "parserTest.ml" 52 1875 1898
 type(
@@ -569,14 +569,130 @@ call(
 type(
   Ast.Expr.t
 )
-"parserTest.ml" 54 1932 1936 "parserTest.ml" 54 1932 1944
+"parserTest.ml" 53 1931 1935 "parserTest.ml" 53 1931 1946
+type(
+  Ast.Expr.t
+)
+ident(
+  def thisFstExpr "parserTest.ml" 56 2097 2097 "parserTest.ml" 1 0 -1
+)
+"parserTest.ml" 53 1931 1949 "parserTest.ml" 53 1931 1958
+type(
+  Ast.Expr.node * Ast.Type.t -> Ast.Expr.t
+)
+ident(
+  ext_ref Ast.Expr.make
+)
+"parserTest.ml" 53 1931 1975 "parserTest.ml" 53 1931 1983
+type(
+  Ast.Expr.t
+)
+ident(
+  int_ref thisExpr "parserTest.ml" 48 1696 1700 "parserTest.ml" 48 1696 1708
+)
+"parserTest.ml" 54 1985 2029 "parserTest.ml" 54 1985 2045
+type(
+  string -> Ast.Field.t
+)
+ident(
+  ext_ref Ast.Field.fromString
+)
+"parserTest.ml" 54 1985 2046 "parserTest.ml" 54 1985 2051
+type(
+  string
+)
+"parserTest.ml" 54 1985 2029 "parserTest.ml" 54 1985 2051
+call(
+  stack
+)
+type(
+  Ast.Field.t
+)
+"parserTest.ml" 53 1931 1960 "parserTest.ml" 54 1985 2052
+type(
+  Ast.Expr.node
+)
+"parserTest.ml" 55 2054 2083 "parserTest.ml" 55 2054 2095
+type(
+  Ast.Type.t
+)
+"parserTest.ml" 53 1931 1959 "parserTest.ml" 55 2054 2096
+type(
+  Ast.Expr.node * Ast.Type.t
+)
+"parserTest.ml" 53 1931 1949 "parserTest.ml" 55 2054 2096
+call(
+  stack
+)
+type(
+  Ast.Expr.t
+)
+"parserTest.ml" 56 2097 2101 "parserTest.ml" 56 2097 2112
+type(
+  Ast.Expr.t
+)
+ident(
+  def thisSndExpr "parserTest.ml" 60 2264 2264 "parserTest.ml" 1 0 -1
+)
+"parserTest.ml" 56 2097 2115 "parserTest.ml" 56 2097 2124
+type(
+  Ast.Expr.node * Ast.Type.t -> Ast.Expr.t
+)
+ident(
+  ext_ref Ast.Expr.make
+)
+"parserTest.ml" 56 2097 2141 "parserTest.ml" 56 2097 2149
+type(
+  Ast.Expr.t
+)
+ident(
+  int_ref thisExpr "parserTest.ml" 48 1696 1700 "parserTest.ml" 48 1696 1708
+)
+"parserTest.ml" 57 2151 2195 "parserTest.ml" 57 2151 2211
+type(
+  string -> Ast.Field.t
+)
+ident(
+  ext_ref Ast.Field.fromString
+)
+"parserTest.ml" 57 2151 2212 "parserTest.ml" 57 2151 2217
+type(
+  string
+)
+"parserTest.ml" 57 2151 2195 "parserTest.ml" 57 2151 2217
+call(
+  stack
+)
+type(
+  Ast.Field.t
+)
+"parserTest.ml" 56 2097 2126 "parserTest.ml" 57 2151 2218
+type(
+  Ast.Expr.node
+)
+"parserTest.ml" 58 2220 2249 "parserTest.ml" 58 2220 2261
+type(
+  Ast.Type.t
+)
+"parserTest.ml" 56 2097 2125 "parserTest.ml" 58 2220 2262
+type(
+  Ast.Expr.node * Ast.Type.t
+)
+"parserTest.ml" 56 2097 2115 "parserTest.ml" 58 2220 2262
+call(
+  stack
+)
+type(
+  Ast.Expr.t
+)
+"parserTest.ml" 60 2264 2268 "parserTest.ml" 60 2264 2276
 type(
   Ast.Class.t
 )
 ident(
-  def expected "parserTest.ml" 90 3911 3911 "parserTest.ml" 1 0 -1
+  def expected "parserTest.ml" 92 3964 3964 "parserTest.ml" 1 0 -1
 )
-"parserTest.ml" 55 1947 1949 "parserTest.ml" 55 1947 1959
+"parserTest.ml" 61 2279 2281 "parserTest.ml" 61 2279 2291
 type(
   tycon:Ast.Tycon.t ->
   tyvars:(Ast.Tyvar.t * Ast.Type.t) list ->
@@ -587,22 +703,22 @@ type(
 ident(
   ext_ref Ast.Class.make
 )
-"parserTest.ml" 56 1961 1973 "parserTest.ml" 56 1961 1982
+"parserTest.ml" 62 2293 2305 "parserTest.ml" 62 2293 2314
 type(
   Ast.Tycon.t
 )
 ident(
   int_ref pairTycon "parserTest.ml" 45 1572 1576 "parserTest.ml" 45 1572 1585
 )
-"parserTest.ml" 57 1983 1996 "parserTest.ml" 57 1983 1998
+"parserTest.ml" 63 2315 2328 "parserTest.ml" 63 2315 2330
 type(
   (Ast.Tyvar.t * Ast.Type.t) list
 )
-"parserTest.ml" 58 1999 2011 "parserTest.ml" 58 1999 2022
+"parserTest.ml" 64 2331 2343 "parserTest.ml" 64 2331 2354
 type(
   Ast.Type.t
 )
-"parserTest.ml" 59 2023 2036 "parserTest.ml" 59 2023 2044
+"parserTest.ml" 65 2355 2368 "parserTest.ml" 65 2355 2376
 type(
   tycon:Ast.Tycon.t ->
   params:(Ast.Var.t * Ast.Type.t) list -> body:Ast.Stmt.t -> Ast.Con.t
@@ -610,195 +726,159 @@ type(
 ident(
   ext_ref Ast.Con.make
 )
-"parserTest.ml" 60 2046 2070 "parserTest.ml" 60 2046 2079
+"parserTest.ml" 66 2378 2402 "parserTest.ml" 66 2378 2411
 type(
   Ast.Tycon.t
 )
 ident(
   int_ref pairTycon "parserTest.ml" 45 1572 1576 "parserTest.ml" 45 1572 1585
 )
-"parserTest.ml" 61 2080 2107 "parserTest.ml" 61 2080 2113
+"parserTest.ml" 67 2412 2439 "parserTest.ml" 67 2412 2445
 type(
   Ast.Var.t
 )
 ident(
   int_ref fstVar "parserTest.ml" 49 1751 1755 "parserTest.ml" 49 1751 1761
 )
-"parserTest.ml" 61 2080 2115 "parserTest.ml" 61 2080 2126
+"parserTest.ml" 67 2412 2447 "parserTest.ml" 67 2412 2458
 type(
   Ast.Type.t
 )
-"parserTest.ml" 61 2080 2106 "parserTest.ml" 61 2080 2127
+"parserTest.ml" 67 2412 2438 "parserTest.ml" 67 2412 2459
 type(
   Ast.Var.t * Ast.Type.t
 )
-"parserTest.ml" 62 2130 2157 "parserTest.ml" 62 2130 2163
+"parserTest.ml" 68 2462 2489 "parserTest.ml" 68 2462 2495
 type(
   Ast.Var.t
 )
 ident(
   int_ref sndVar "parserTest.ml" 50 1785 1789 "parserTest.ml" 50 1785 1795
 )
-"parserTest.ml" 62 2130 2165 "parserTest.ml" 62 2130 2176
+"parserTest.ml" 68 2462 2497 "parserTest.ml" 68 2462 2508
 type(
   Ast.Type.t
 )
-"parserTest.ml" 62 2130 2156 "parserTest.ml" 62 2130 2177
+"parserTest.ml" 68 2462 2488 "parserTest.ml" 68 2462 2509
 type(
   Ast.Var.t * Ast.Type.t
 )
-"parserTest.ml" 61 2080 2105 "parserTest.ml" 62 2130 2178
+"parserTest.ml" 67 2412 2437 "parserTest.ml" 68 2462 2510
 type(
   (Ast.Var.t * Ast.Type.t) list
 )
-"parserTest.ml" 63 2179 2227 "parserTest.ml" 63 2179 2235
+"parserTest.ml" 69 2511 2559 "parserTest.ml" 69 2511 2570
 type(
   Ast.Expr.t
 )
 ident(
-  int_ref thisExpr "parserTest.ml" 48 1696 1700 "parserTest.ml" 48 1696 1708
+  int_ref thisFstExpr "parserTest.ml" 53 1931 1935 "parserTest.ml" 53 1931 1946
 )
-"parserTest.ml" 64 2238 2285 "parserTest.ml" 64 2238 2301
-type(
-  string -> Ast.Field.t
-)
-ident(
-  ext_ref Ast.Field.fromString
-)
-"parserTest.ml" 64 2238 2302 "parserTest.ml" 64 2238 2307
-type(
-  string
-)
-"parserTest.ml" 64 2238 2285 "parserTest.ml" 64 2238 2307
-call(
-  stack
-)
-type(
-  Ast.Field.t
-)
-"parserTest.ml" 65 2310 2357 "parserTest.ml" 65 2310 2364
+"parserTest.ml" 70 2573 2620 "parserTest.ml" 70 2573 2627
 type(
   Ast.Expr.t
 )
 ident(
   int_ref fstExpr "parserTest.ml" 51 1819 1823 "parserTest.ml" 51 1819 1830
 )
-"parserTest.ml" 63 2179 2213 "parserTest.ml" 65 2310 2365
+"parserTest.ml" 69 2511 2545 "parserTest.ml" 70 2573 2628
 type(
   Ast.Stmt.t
 )
-"parserTest.ml" 66 2367 2415 "parserTest.ml" 66 2367 2423
+"parserTest.ml" 71 2630 2678 "parserTest.ml" 71 2630 2689
 type(
   Ast.Expr.t
 )
 ident(
-  int_ref thisExpr "parserTest.ml" 48 1696 1700 "parserTest.ml" 48 1696 1708
+  int_ref thisSndExpr "parserTest.ml" 56 2097 2101 "parserTest.ml" 56 2097 2112
 )
-"parserTest.ml" 67 2425 2472 "parserTest.ml" 67 2425 2488
-type(
-  string -> Ast.Field.t
-)
-ident(
-  ext_ref Ast.Field.fromString
-)
-"parserTest.ml" 67 2425 2489 "parserTest.ml" 67 2425 2494
-type(
-  string
-)
-"parserTest.ml" 67 2425 2472 "parserTest.ml" 67 2425 2494
-call(
-  stack
-)
-type(
-  Ast.Field.t
-)
-"parserTest.ml" 68 2497 2544 "parserTest.ml" 68 2497 2551
+"parserTest.ml" 72 2692 2739 "parserTest.ml" 72 2692 2746
 type(
   Ast.Expr.t
 )
 ident(
   int_ref sndExpr "parserTest.ml" 52 1875 1879 "parserTest.ml" 52 1875 1886
 )
-"parserTest.ml" 66 2367 2401 "parserTest.ml" 68 2497 2552
+"parserTest.ml" 71 2630 2664 "parserTest.ml" 72 2692 2747
 type(
   Ast.Stmt.t
 )
-"parserTest.ml" 63 2179 2212 "parserTest.ml" 68 2497 2553
+"parserTest.ml" 69 2511 2544 "parserTest.ml" 72 2692 2748
 type(
   Ast.Stmt.t list
 )
-"parserTest.ml" 63 2179 2202 "parserTest.ml" 68 2497 2554
+"parserTest.ml" 69 2511 2534 "parserTest.ml" 72 2692 2749
 type(
   Ast.Stmt.t
 )
-"parserTest.ml" 59 2023 2036 "parserTest.ml" 68 2497 2554
+"parserTest.ml" 65 2355 2368 "parserTest.ml" 72 2692 2749
 call(
   stack
 )
 type(
   Ast.Con.t
 )
-"parserTest.ml" 59 2023 2035 "parserTest.ml" 68 2497 2555
+"parserTest.ml" 65 2355 2367 "parserTest.ml" 72 2692 2750
 type(
   Ast.Con.t list
 )
-"parserTest.ml" 69 2556 2571 "parserTest.ml" 69 2556 2587
+"parserTest.ml" 73 2751 2766 "parserTest.ml" 73 2751 2782
 type(
   string -> Ast.Field.t
 )
 ident(
   ext_ref Ast.Field.fromString
 )
-"parserTest.ml" 69 2556 2588 "parserTest.ml" 69 2556 2593
+"parserTest.ml" 73 2751 2783 "parserTest.ml" 73 2751 2788
 type(
   string
 )
-"parserTest.ml" 69 2556 2571 "parserTest.ml" 69 2556 2593
+"parserTest.ml" 73 2751 2766 "parserTest.ml" 73 2751 2788
 call(
   stack
 )
 type(
   Ast.Field.t
 )
-"parserTest.ml" 69 2556 2595 "parserTest.ml" 69 2556 2606
+"parserTest.ml" 73 2751 2790 "parserTest.ml" 73 2751 2801
 type(
   Ast.Type.t
 )
-"parserTest.ml" 69 2556 2570 "parserTest.ml" 69 2556 2607
+"parserTest.ml" 73 2751 2765 "parserTest.ml" 73 2751 2802
 type(
   Ast.Field.t * Ast.Type.t
 )
-"parserTest.ml" 70 2609 2624 "parserTest.ml" 70 2609 2640
+"parserTest.ml" 74 2804 2819 "parserTest.ml" 74 2804 2835
 type(
   string -> Ast.Field.t
 )
 ident(
   ext_ref Ast.Field.fromString
 )
-"parserTest.ml" 70 2609 2641 "parserTest.ml" 70 2609 2646
+"parserTest.ml" 74 2804 2836 "parserTest.ml" 74 2804 2841
 type(
   string
 )
-"parserTest.ml" 70 2609 2624 "parserTest.ml" 70 2609 2646
+"parserTest.ml" 74 2804 2819 "parserTest.ml" 74 2804 2841
 call(
   stack
 )
 type(
   Ast.Field.t
 )
-"parserTest.ml" 70 2609 2648 "parserTest.ml" 70 2609 2659
+"parserTest.ml" 74 2804 2843 "parserTest.ml" 74 2804 2854
 type(
   Ast.Type.t
 )
-"parserTest.ml" 70 2609 2623 "parserTest.ml" 70 2609 2660
+"parserTest.ml" 74 2804 2818 "parserTest.ml" 74 2804 2855
 type(
   Ast.Field.t * Ast.Type.t
 )
-"parserTest.ml" 69 2556 2569 "parserTest.ml" 70 2609 2661
+"parserTest.ml" 73 2751 2764 "parserTest.ml" 74 2804 2856
 type(
   (Ast.Field.t * Ast.Type.t) list
 )
-"parserTest.ml" 71 2662 2678 "parserTest.ml" 71 2662 2689
+"parserTest.ml" 75 2857 2873 "parserTest.ml" 75 2857 2884
 type(
   name:Ast.MethodName.t ->
   params:(Ast.Var.t * Ast.Type.t) list ->
@@ -807,370 +887,334 @@ type(
 ident(
   ext_ref Ast.Method.make
 )
-"parserTest.ml" 72 2690 2716 "parserTest.ml" 72 2690 2737
+"parserTest.ml" 76 2885 2911 "parserTest.ml" 76 2885 2932
 type(
   string -> Ast.MethodName.t
 )
 ident(
   ext_ref Ast.MethodName.fromString
 )
-"parserTest.ml" 72 2690 2738 "parserTest.ml" 72 2690 2744
+"parserTest.ml" 76 2885 2933 "parserTest.ml" 76 2885 2939
 type(
   string
 )
-"parserTest.ml" 72 2690 2715 "parserTest.ml" 72 2690 2745
+"parserTest.ml" 76 2885 2910 "parserTest.ml" 76 2885 2940
 call(
   stack
 )
 type(
   Ast.MethodName.t
 )
-"parserTest.ml" 73 2746 2773 "parserTest.ml" 73 2746 2775
+"parserTest.ml" 77 2941 2968 "parserTest.ml" 77 2941 2970
 type(
   (Ast.Var.t * Ast.Type.t) list
 )
-"parserTest.ml" 74 2776 2825 "parserTest.ml" 74 2776 2836
+"parserTest.ml" 78 2971 3020 "parserTest.ml" 78 2971 3031
 type(
   Ast.Type.t
 )
-"parserTest.ml" 75 2838 2886 "parserTest.ml" 75 2838 2900
+"parserTest.ml" 79 3033 3081 "parserTest.ml" 79 3033 3095
 type(
   string -> Ast.Var.t
 )
 ident(
   ext_ref Ast.Var.fromString
 )
-"parserTest.ml" 75 2838 2901 "parserTest.ml" 75 2838 2907
+"parserTest.ml" 79 3033 3096 "parserTest.ml" 79 3033 3102
 type(
   string
 )
-"parserTest.ml" 75 2838 2886 "parserTest.ml" 75 2838 2907
+"parserTest.ml" 79 3033 3081 "parserTest.ml" 79 3033 3102
 call(
   stack
 )
 type(
   Ast.Var.t
 )
-"parserTest.ml" 76 2909 2957 "parserTest.ml" 76 2909 2966
+"parserTest.ml" 80 3104 3152 "parserTest.ml" 80 3104 3161
 type(
   Ast.Expr.node * Ast.Type.t -> Ast.Expr.t
 )
 ident(
   ext_ref Ast.Expr.make
 )
-"parserTest.ml" 76 2909 2983 "parserTest.ml" 76 2909 2991
+"parserTest.ml" 80 3104 3178 "parserTest.ml" 80 3104 3186
 type(
   Ast.Expr.t
 )
 ident(
   int_ref thisExpr "parserTest.ml" 48 1696 1700 "parserTest.ml" 48 1696 1708
 )
-"parserTest.ml" 77 2993 3067 "parserTest.ml" 77 2993 3083
+"parserTest.ml" 81 3188 3262 "parserTest.ml" 81 3188 3278
 type(
   string -> Ast.Field.t
 )
 ident(
   ext_ref Ast.Field.fromString
 )
-"parserTest.ml" 77 2993 3084 "parserTest.ml" 77 2993 3089
+"parserTest.ml" 81 3188 3279 "parserTest.ml" 81 3188 3284
 type(
   string
 )
-"parserTest.ml" 77 2993 3067 "parserTest.ml" 77 2993 3089
+"parserTest.ml" 81 3188 3262 "parserTest.ml" 81 3188 3284
 call(
   stack
 )
 type(
   Ast.Field.t
 )
-"parserTest.ml" 76 2909 2968 "parserTest.ml" 77 2993 3090
+"parserTest.ml" 80 3104 3163 "parserTest.ml" 81 3188 3285
 type(
   Ast.Expr.node
 )
-"parserTest.ml" 78 3092 3151 "parserTest.ml" 78 3092 3163
+"parserTest.ml" 82 3287 3346 "parserTest.ml" 82 3287 3358
 type(
   Ast.Type.t
 )
-"parserTest.ml" 76 2909 2967 "parserTest.ml" 78 3092 3164
+"parserTest.ml" 80 3104 3162 "parserTest.ml" 82 3287 3359
 type(
   Ast.Expr.node * Ast.Type.t
 )
-"parserTest.ml" 76 2909 2957 "parserTest.ml" 78 3092 3164
+"parserTest.ml" 80 3104 3152 "parserTest.ml" 82 3287 3359
 call(
   stack
 )
 type(
   Ast.Expr.t
 )
-"parserTest.ml" 74 2776 2812 "parserTest.ml" 78 3092 3165
+"parserTest.ml" 78 2971 3007 "parserTest.ml" 82 3287 3360
 type(
   Ast.Stmt.t
 )
-"parserTest.ml" 79 3167 3217 "parserTest.ml" 79 3167 3225
+"parserTest.ml" 83 3362 3412 "parserTest.ml" 83 3362 3423
 type(
   Ast.Expr.t
 )
 ident(
-  int_ref thisExpr "parserTest.ml" 48 1696 1700 "parserTest.ml" 48 1696 1708
+  int_ref thisFstExpr "parserTest.ml" 53 1931 1935 "parserTest.ml" 53 1931 1946
 )
-"parserTest.ml" 80 3227 3277 "parserTest.ml" 80 3227 3293
-type(
-  string -> Ast.Field.t
-)
-ident(
-  ext_ref Ast.Field.fromString
-)
-"parserTest.ml" 80 3227 3294 "parserTest.ml" 80 3227 3299
-type(
-  string
-)
-"parserTest.ml" 80 3227 3277 "parserTest.ml" 80 3227 3299
-call(
-  stack
-)
-type(
-  Ast.Field.t
-)
-"parserTest.ml" 81 3301 3351 "parserTest.ml" 81 3301 3360
+"parserTest.ml" 84 3425 3475 "parserTest.ml" 84 3425 3484
 type(
   Ast.Expr.node * Ast.Type.t -> Ast.Expr.t
 )
 ident(
   ext_ref Ast.Expr.make
 )
-"parserTest.ml" 81 3301 3377 "parserTest.ml" 81 3301 3385
+"parserTest.ml" 84 3425 3501 "parserTest.ml" 84 3425 3509
 type(
   Ast.Expr.t
 )
 ident(
   int_ref thisExpr "parserTest.ml" 48 1696 1700 "parserTest.ml" 48 1696 1708
 )
-"parserTest.ml" 82 3387 3463 "parserTest.ml" 82 3387 3479
+"parserTest.ml" 85 3511 3587 "parserTest.ml" 85 3511 3603
 type(
   string -> Ast.Field.t
 )
 ident(
   ext_ref Ast.Field.fromString
 )
-"parserTest.ml" 82 3387 3480 "parserTest.ml" 82 3387 3485
+"parserTest.ml" 85 3511 3604 "parserTest.ml" 85 3511 3609
 type(
   string
 )
-"parserTest.ml" 82 3387 3463 "parserTest.ml" 82 3387 3485
+"parserTest.ml" 85 3511 3587 "parserTest.ml" 85 3511 3609
 call(
   stack
 )
 type(
   Ast.Field.t
 )
-"parserTest.ml" 81 3301 3362 "parserTest.ml" 82 3387 3486
+"parserTest.ml" 84 3425 3486 "parserTest.ml" 85 3511 3610
 type(
   Ast.Expr.node
 )
-"parserTest.ml" 83 3488 3547 "parserTest.ml" 83 3488 3559
+"parserTest.ml" 86 3612 3671 "parserTest.ml" 86 3612 3683
 type(
   Ast.Type.t
 )
-"parserTest.ml" 81 3301 3361 "parserTest.ml" 83 3488 3560
+"parserTest.ml" 84 3425 3485 "parserTest.ml" 86 3612 3684
 type(
   Ast.Expr.node * Ast.Type.t
 )
-"parserTest.ml" 81 3301 3351 "parserTest.ml" 83 3488 3560
+"parserTest.ml" 84 3425 3475 "parserTest.ml" 86 3612 3684
 call(
   stack
 )
 type(
   Ast.Expr.t
 )
-"parserTest.ml" 79 3167 3202 "parserTest.ml" 83 3488 3561
+"parserTest.ml" 83 3362 3397 "parserTest.ml" 86 3612 3685
 type(
   Ast.Stmt.t
 )
-"parserTest.ml" 84 3563 3613 "parserTest.ml" 84 3563 3621
+"parserTest.ml" 87 3687 3737 "parserTest.ml" 87 3687 3748
 type(
   Ast.Expr.t
 )
 ident(
-  int_ref thisExpr "parserTest.ml" 48 1696 1700 "parserTest.ml" 48 1696 1708
+  int_ref thisSndExpr "parserTest.ml" 56 2097 2101 "parserTest.ml" 56 2097 2112
 )
-"parserTest.ml" 85 3623 3673 "parserTest.ml" 85 3623 3689
-type(
-  string -> Ast.Field.t
-)
-ident(
-  ext_ref Ast.Field.fromString
-)
-"parserTest.ml" 85 3623 3690 "parserTest.ml" 85 3623 3695
-type(
-  string
-)
-"parserTest.ml" 85 3623 3673 "parserTest.ml" 85 3623 3695
-call(
-  stack
-)
-type(
-  Ast.Field.t
-)
-"parserTest.ml" 86 3697 3747 "parserTest.ml" 86 3697 3756
+"parserTest.ml" 88 3750 3800 "parserTest.ml" 88 3750 3809
 type(
   Ast.Expr.node * Ast.Type.t -> Ast.Expr.t
 )
 ident(
   ext_ref Ast.Expr.make
 )
-"parserTest.ml" 86 3697 3768 "parserTest.ml" 86 3697 3782
+"parserTest.ml" 88 3750 3821 "parserTest.ml" 88 3750 3835
 type(
   string -> Ast.Var.t
 )
 ident(
   ext_ref Ast.Var.fromString
 )
-"parserTest.ml" 86 3697 3783 "parserTest.ml" 86 3697 3789
+"parserTest.ml" 88 3750 3836 "parserTest.ml" 88 3750 3842
 type(
   string
 )
-"parserTest.ml" 86 3697 3767 "parserTest.ml" 86 3697 3790
+"parserTest.ml" 88 3750 3820 "parserTest.ml" 88 3750 3843
 call(
   stack
 )
 type(
   Ast.Var.t
 )
-"parserTest.ml" 86 3697 3758 "parserTest.ml" 86 3697 3790
+"parserTest.ml" 88 3750 3811 "parserTest.ml" 88 3750 3843
 type(
   Ast.Expr.node
 )
-"parserTest.ml" 87 3792 3853 "parserTest.ml" 87 3792 3865
+"parserTest.ml" 89 3845 3906 "parserTest.ml" 89 3845 3918
 type(
   Ast.Type.t
 )
-"parserTest.ml" 86 3697 3757 "parserTest.ml" 87 3792 3866
+"parserTest.ml" 88 3750 3810 "parserTest.ml" 89 3845 3919
 type(
   Ast.Expr.node * Ast.Type.t
 )
-"parserTest.ml" 86 3697 3747 "parserTest.ml" 87 3792 3866
+"parserTest.ml" 88 3750 3800 "parserTest.ml" 89 3845 3919
 call(
   stack
 )
 type(
   Ast.Expr.t
 )
-"parserTest.ml" 84 3563 3598 "parserTest.ml" 87 3792 3867
+"parserTest.ml" 87 3687 3722 "parserTest.ml" 89 3845 3920
 type(
   Ast.Stmt.t
 )
-"parserTest.ml" 74 2776 2811 "parserTest.ml" 87 3792 3868
+"parserTest.ml" 78 2971 3006 "parserTest.ml" 89 3845 3921
 type(
   Ast.Stmt.t list
 )
-"parserTest.ml" 74 2776 2801 "parserTest.ml" 87 3792 3869
+"parserTest.ml" 78 2971 2996 "parserTest.ml" 89 3845 3922
 type(
   Ast.Stmt.t
 )
-"parserTest.ml" 88 3870 3899 "parserTest.ml" 88 3870 3907
+"parserTest.ml" 90 3923 3952 "parserTest.ml" 90 3923 3960
 type(
   Ast.Type.t
 )
 ident(
   int_ref pairType "parserTest.ml" 46 1622 1626 "parserTest.ml" 46 1622 1634
 )
-"parserTest.ml" 71 2662 2677 "parserTest.ml" 88 3870 3908
+"parserTest.ml" 75 2857 2872 "parserTest.ml" 90 3923 3961
 call(
   stack
 )
 type(
   Ast.Method.t
 )
-"parserTest.ml" 71 2662 2676 "parserTest.ml" 88 3870 3909
+"parserTest.ml" 75 2857 2871 "parserTest.ml" 90 3923 3962
 type(
   Ast.Method.t list
 )
-"parserTest.ml" 55 1947 1949 "parserTest.ml" 88 3870 3909
+"parserTest.ml" 61 2279 2281 "parserTest.ml" 90 3923 3962
 call(
   stack
 )
 type(
   Ast.Class.t
 )
-"parserTest.ml" 90 3911 3915 "parserTest.ml" 90 3911 3920
+"parserTest.ml" 92 3964 3968 "parserTest.ml" 92 3964 3973
 type(
   string -> Ast.Class.t list
 )
 ident(
-  def parse "parserTest.ml" 93 3975 3975 "parserTest.ml" 1 0 -1
+  def parse "parserTest.ml" 95 4028 4028 "parserTest.ml" 1 0 -1
 )
-"parserTest.ml" 90 3911 3921 "parserTest.ml" 90 3911 3922
+"parserTest.ml" 92 3964 3974 "parserTest.ml" 92 3964 3975
 type(
   string
 )
 ident(
-  def s "parserTest.ml" 91 3925 3927 "parserTest.ml" 91 3925 3973
+  def s "parserTest.ml" 93 3978 3980 "parserTest.ml" 93 3978 4026
 )
-"parserTest.ml" 91 3925 3927 "parserTest.ml" 91 3925 3938
+"parserTest.ml" 93 3978 3980 "parserTest.ml" 93 3978 3991
 type(
   (Lexer.L.lexbuf -> Parser.token) -> Lexing.lexbuf -> Ast.Class.t list
 )
 ident(
   ext_ref Parser.prog
 )
-"parserTest.ml" 91 3925 3939 "parserTest.ml" 91 3925 3950
+"parserTest.ml" 93 3978 3992 "parserTest.ml" 93 3978 4003
 type(
   Lexer.L.lexbuf -> Parser.token
 )
 ident(
   ext_ref Lexer.token
 )
-"parserTest.ml" 91 3925 3952 "parserTest.ml" 91 3925 3970
+"parserTest.ml" 93 3978 4005 "parserTest.ml" 93 3978 4023
 type(
   string -> Lexing.lexbuf
 )
 ident(
   ext_ref Lexing.from_string
 )
-"parserTest.ml" 91 3925 3971 "parserTest.ml" 91 3925 3972
+"parserTest.ml" 93 3978 4024 "parserTest.ml" 93 3978 4025
 type(
   string
 )
 ident(
-  int_ref s "parserTest.ml" 90 3911 3921 "parserTest.ml" 90 3911 3922
+  int_ref s "parserTest.ml" 92 3964 3974 "parserTest.ml" 92 3964 3975
 )
-"parserTest.ml" 91 3925 3951 "parserTest.ml" 91 3925 3973
+"parserTest.ml" 93 3978 4004 "parserTest.ml" 93 3978 4026
 call(
   stack
 )
 type(
   Lexing.lexbuf
 )
-"parserTest.ml" 91 3925 3927 "parserTest.ml" 91 3925 3973
+"parserTest.ml" 93 3978 3980 "parserTest.ml" 93 3978 4026
 call(
   tail
 )
 type(
   Ast.Class.t list
 )
-"parserTest.ml" 93 3975 3979 "parserTest.ml" 93 3975 3989
+"parserTest.ml" 95 4028 4032 "parserTest.ml" 95 4028 4042
 type(
   OUnit.test
 )
 ident(
-  def parse_test "parserTest.ml" 97 4069 4069 "parserTest.ml" 1 0 -1
+  def parse_test "parserTest.ml" 99 4122 4122 "parserTest.ml" 1 0 -1
 )
-"parserTest.ml" 94 3992 3994 "parserTest.ml" 94 3992 4006
+"parserTest.ml" 96 4045 4047 "parserTest.ml" 96 4045 4059
 type(
   string
 )
-"parserTest.ml" 94 3992 4007 "parserTest.ml" 94 3992 4010
+"parserTest.ml" 96 4045 4060 "parserTest.ml" 96 4045 4063
 type(
   string -> OUnit.test_fun -> OUnit.test
 )
 ident(
   ext_ref OUnit.( >:: )
 )
-"parserTest.ml" 94 3992 4016 "parserTest.ml" 94 3992 4018
+"parserTest.ml" 96 4045 4069 "parserTest.ml" 96 4045 4071
 type(
   unit
 )
-"parserTest.ml" 95 4022 4028 "parserTest.ml" 95 4022 4040
+"parserTest.ml" 97 4075 4081 "parserTest.ml" 97 4075 4093
 type(
   ?cmp:(Ast.Class.t list -> Ast.Class.t list -> bool) ->
   ?printer:(Ast.Class.t list -> string) ->
@@ -1180,132 +1224,132 @@ type(
 ident(
   ext_ref OUnit.assert_equal
 )
-"parserTest.ml" 95 4022 4042 "parserTest.ml" 95 4022 4050
+"parserTest.ml" 97 4075 4095 "parserTest.ml" 97 4075 4103
 type(
   Ast.Class.t
 )
 ident(
-  int_ref expected "parserTest.ml" 54 1932 1936 "parserTest.ml" 54 1932 1944
+  int_ref expected "parserTest.ml" 60 2264 2268 "parserTest.ml" 60 2264 2276
 )
-"parserTest.ml" 95 4022 4041 "parserTest.ml" 95 4022 4051
+"parserTest.ml" 97 4075 4094 "parserTest.ml" 97 4075 4104
 type(
   Ast.Class.t list
 )
-"parserTest.ml" 95 4022 4053 "parserTest.ml" 95 4022 4058
+"parserTest.ml" 97 4075 4106 "parserTest.ml" 97 4075 4111
 type(
   string -> Ast.Class.t list
 )
 ident(
-  int_ref parse "parserTest.ml" 90 3911 3915 "parserTest.ml" 90 3911 3920
+  int_ref parse "parserTest.ml" 92 3964 3968 "parserTest.ml" 92 3964 3973
 )
-"parserTest.ml" 95 4022 4059 "parserTest.ml" 95 4022 4065
+"parserTest.ml" 97 4075 4112 "parserTest.ml" 97 4075 4118
 type(
   string
 )
 ident(
   int_ref target "parserTest.ml" 29 1243 1247 "parserTest.ml" 29 1243 1253
 )
-"parserTest.ml" 95 4022 4052 "parserTest.ml" 95 4022 4066
+"parserTest.ml" 97 4075 4105 "parserTest.ml" 97 4075 4119
 call(
   stack
 )
 type(
   Ast.Class.t list
 )
-"parserTest.ml" 95 4022 4028 "parserTest.ml" 95 4022 4066
+"parserTest.ml" 97 4075 4081 "parserTest.ml" 97 4075 4119
 call(
   tail
 )
 type(
   unit
 )
-"parserTest.ml" 94 3992 4011 "parserTest.ml" 95 4022 4067
+"parserTest.ml" 96 4045 4064 "parserTest.ml" 97 4075 4120
 type(
   OUnit.test_fun
 )
-"parserTest.ml" 94 3992 3994 "parserTest.ml" 95 4022 4067
+"parserTest.ml" 96 4045 4047 "parserTest.ml" 97 4075 4120
 call(
   stack
 )
 type(
   OUnit.test
 )
-"parserTest.ml" 97 4069 4073 "parserTest.ml" 97 4069 4083
+"parserTest.ml" 99 4122 4126 "parserTest.ml" 99 4122 4136
 type(
   OUnit.test
 )
 ident(
-  def test_suite "parserTest.ml" 102 4125 4125 "parserTest.ml" 1 0 -1
+  def test_suite "parserTest.ml" 104 4178 4178 "parserTest.ml" 1 0 -1
 )
-"parserTest.ml" 98 4087 4089 "parserTest.ml" 98 4087 4097
+"parserTest.ml" 100 4140 4142 "parserTest.ml" 100 4140 4150
 type(
   string
 )
-"parserTest.ml" 98 4087 4098 "parserTest.ml" 98 4087 4102
+"parserTest.ml" 100 4140 4151 "parserTest.ml" 100 4140 4155
 type(
   string -> OUnit.test list -> OUnit.test
 )
 ident(
   ext_ref OUnit.( >::: )
 )
-"parserTest.ml" 99 4105 4109 "parserTest.ml" 99 4105 4119
+"parserTest.ml" 101 4158 4162 "parserTest.ml" 101 4158 4172
 type(
   OUnit.test
 )
 ident(
-  int_ref parse_test "parserTest.ml" 93 3975 3979 "parserTest.ml" 93 3975 3989
+  int_ref parse_test "parserTest.ml" 95 4028 4032 "parserTest.ml" 95 4028 4042
 )
-"parserTest.ml" 98 4087 4103 "parserTest.ml" 100 4120 4123
+"parserTest.ml" 100 4140 4156 "parserTest.ml" 102 4173 4176
 type(
   OUnit.test list
 )
-"parserTest.ml" 98 4087 4089 "parserTest.ml" 100 4120 4123
+"parserTest.ml" 100 4140 4142 "parserTest.ml" 102 4173 4176
 call(
   stack
 )
 type(
   OUnit.test
 )
-"parserTest.ml" 104 4142 4146 "parserTest.ml" 104 4142 4159
+"parserTest.ml" 106 4195 4199 "parserTest.ml" 106 4195 4212
 type(
   (unit, out_channel, unit) format -> unit
 )
 ident(
   ext_ref Printf.printf
 )
-"parserTest.ml" 104 4142 4160 "parserTest.ml" 104 4142 4175
+"parserTest.ml" 106 4195 4213 "parserTest.ml" 106 4195 4228
 type(
   (unit, out_channel, unit) format
 )
-"parserTest.ml" 104 4142 4146 "parserTest.ml" 104 4142 4175
+"parserTest.ml" 106 4195 4199 "parserTest.ml" 106 4195 4228
 call(
   stack
 )
 type(
   unit
 )
-"parserTest.ml" 105 4177 4181 "parserTest.ml" 105 4177 4192
+"parserTest.ml" 107 4230 4234 "parserTest.ml" 107 4230 4245
 type(
   ?verbose:bool -> OUnit.test -> OUnit.test_results
 )
 ident(
   ext_ref OUnit.run_test_tt
 )
-"parserTest.ml" 105 4177 4193 "parserTest.ml" 105 4177 4203
+"parserTest.ml" 107 4230 4246 "parserTest.ml" 107 4230 4256
 type(
   OUnit.test
 )
 ident(
-  int_ref test_suite "parserTest.ml" 97 4069 4073 "parserTest.ml" 97 4069 4083
+  int_ref test_suite "parserTest.ml" 99 4122 4126 "parserTest.ml" 99 4122 4136
 )
-"parserTest.ml" 105 4177 4181 "parserTest.ml" 105 4177 4203
+"parserTest.ml" 107 4230 4234 "parserTest.ml" 107 4230 4256
 call(
   stack
 )
 type(
   OUnit.test_results
 )
-"parserTest.ml" 103 4134 4136 "parserTest.ml" 106 4204 4209
+"parserTest.ml" 105 4187 4189 "parserTest.ml" 108 4257 4262
 type(
   OUnit.test_results
 )

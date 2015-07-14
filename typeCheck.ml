@@ -242,7 +242,7 @@ struct
       match stmt with 
         | VarDec (t,v,e) -> VarDec (t,v,doItExp e)
         | Assn (v,e) -> Assn (v,doItExp e)
-        | FieldSet (e1,f,e2) -> FieldSet (doItExp e1, f, doItExp e2)
+        | FieldSet (e1,e2) -> FieldSet (doItExp e1, doItExp e2)
         | Expr e -> Expr (doItExp e)
         | Seq stmts -> Seq (List.map doIt stmts)
         | Seq2 (s1,s2) -> Seq2 (doIt s1, doIt s2)

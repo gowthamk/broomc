@@ -68,11 +68,9 @@ let expected =
                 ~tycon: pairTycon
                 ~params: [(fstVar, tyA); 
                           (sndVar, tyB)]
-                ~body: (Stmt.Seq [Stmt.FieldSet(thisExpr, 
-                                               Field.fromString "fst", 
+                ~body: (Stmt.Seq [Stmt.FieldSet(thisFstExpr, 
                                                fstExpr);
-                                  Stmt.FieldSet(thisExpr,
-                                               Field.fromString "snd", 
+                                  Stmt.FieldSet(thisSndExpr, 
                                                sndExpr)])]
     ~fields: [(Field.fromString "fst", tyA);
               (Field.fromString "snd", tyB)]
@@ -90,8 +88,8 @@ let parse s =
   Parser.prog Lexer.token (Lexing.from_string s)
 
 let parse_test =
-  "parse_test" >:: (fun () ->
-      assert_equal [expected] (parse target))
+    "parse_test" >:: (fun () ->
+        assert_equal [expected] (parse target))
 
 let test_suite = 
   "Parser" >::: [
