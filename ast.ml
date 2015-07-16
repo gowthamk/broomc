@@ -1,41 +1,33 @@
-module type ID = 
-sig
-  type t
-  val fromString : string -> t
-  val toString : t -> string
-  val equal : t * t -> bool
-end
-
-let ($) f x = x |> f
-let rec printCSV = function
-  | [] -> ""
-  | [str] -> str
-  | str::strs -> str^","^(printCSV strs)
-
-
 module Var = Id
 module Tyvar = Id
 module Field = Id
 module MethodName = Id
 module MN = MethodName
 open Format
+open Utils
 
 module Tycon =
 struct
-  type t =  Object | T of Id.t
+  type t =  Object | Region | T of Id.t
 
   let make (x : Id.t) : t = match Id.toString x with 
     | "Object" -> Object
+    | "Region" -> Region
     | _ -> T x
   let equal = function 
     | (Object,Object) -> true
+    | (Region,Region) -> true
     | (T id1, T id2) -> Id.equal (id1,id2)
     | _ -> false
   let toString = function
     | Object -> "Object"
+    | Region -> "Region"
     | (T id) -> Id.toString id
   let isObject = function
     | Object -> true
+    | _ -> false
+  let isRegion = function
+    | Region -> true
     | _ -> false
 end
 
@@ -69,6 +61,9 @@ struct
           if List.length tyargs = 0 then ""
           else "<"^(printCSV @@ List.map toString tyargs)^">"
         end 
+  let isRegion = function
+    | ConApp (Tycon.Region,_) -> true
+    | _ -> false
 end
 
 module Expr =
@@ -115,6 +110,9 @@ struct
     | Expr of Expr.t
     | Seq of t list
     | Seq2 of t * t
+    | LetRegion of t
+    | Open of Expr.t * t
+    | OpenAlloc of Expr.t * t
   
   let dec (t,v,e) = VarDec (t,v,e)
   let assn (v,e) = Assn (v,e)
@@ -142,6 +140,27 @@ struct
                   print stmt;
                 end) stmts;
               printf "@]";
+            end
+        | LetRegion stmt ->
+            begin
+              printf "letregion {";
+              printf "@\n";
+              printf "@[<v 2>"; print stmt; printf "@]";
+              printf "}";
+            end
+        | Open (e,stmt) ->
+            begin
+              printf "open (%s) {" (estr e);
+              printf "@\n";
+              printf "@[<v 2>"; print stmt; printf "@]";
+              printf "}";
+            end
+        | OpenAlloc (e,stmt) ->
+            begin
+              printf "openalloc (%s) {" (estr e);
+              printf "@\n";
+              printf "@[<v 2>"; print stmt; printf "@]";
+              printf "}";
             end
         | _ -> failwith "Unimpl."
 end

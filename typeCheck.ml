@@ -246,6 +246,21 @@ struct
         | Expr e -> Expr (doItExp e)
         | Seq stmts -> Seq (List.map doIt stmts)
         | Seq2 (s1,s2) -> Seq2 (doIt s1, doIt s2)
+        | LetRegion s -> LetRegion (doIt s)
+        | Open (vexp,s) -> 
+            let vexp' = doItExp vexp in
+            let ty = Expr.typ vexp' in
+            let _ = assrt (Type.isRegion ty, "A variable of non-\
+                           \region type cannot be opened.") in
+            let s' = doIt s in
+              Open (vexp',s')
+        | OpenAlloc (vexp,s) -> 
+            let vexp' = doItExp vexp in
+            let ty = Expr.typ vexp' in
+            let _ = assrt (Type.isRegion ty, "A variable of non-\
+                           \region type cannot be openalloc'd.") in
+            let s' = doIt s in
+              OpenAlloc (vexp',s')
 
   let overrideOk ct tyVE (mname,classTyp, mtyp) =
     match classTyp with 

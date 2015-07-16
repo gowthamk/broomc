@@ -49,6 +49,10 @@
 %token T_keyword_new
 %token T_keyword_super
 %token T_keyword_return
+%token T_keyword_let
+%token T_keyword_letregion
+%token T_keyword_open
+%token T_keyword_openalloc
 %token T_keyword_int
 %token T_keyword_bool
 %token T_keyword_void
@@ -230,16 +234,24 @@ stmt:
   | atomstmtseq {Ast.Stmt.Seq $1}
 
 atomstmtseq:
-  | atomstmt T_semicolon atomstmtseq {$1 :: $3}
+  | atomstmt atomstmtseq {$1 :: $2}
   |   {[]}
 
 atomstmt:
-  | typ var T_assign expr 
+  | typ var T_assign expr T_semicolon 
       {Ast.Stmt.VarDec ($1,$2,$4)}
-  | var expr
+  | T_keyword_let typ var T_assign expr T_semicolon 
+      {Ast.Stmt.VarDec ($2,$3,$5)}
+  | var expr T_semicolon 
       {Ast.Stmt.Assn ($1,$2)}
-  | expr T_period field T_assign expr
+  | expr T_period field T_assign expr T_semicolon 
       {let lhsExp = Expr.make (Expr.FieldGet ($1,$3), Type.Unknown) in
         Ast.Stmt.FieldSet (lhsExp,$5)}
-  | expr
+  | expr T_semicolon 
       {Ast.Stmt.Expr $1}
+  | T_keyword_letregion T_lbrace stmt T_rbrace
+      {Ast.Stmt.LetRegion $3}
+  | T_keyword_open T_lparen var T_rparen T_lbrace stmt T_rbrace 
+      {Ast.Stmt.Open (Expr.make (Expr.Var $3,Type.Unknown),$6)}
+  | T_keyword_openalloc T_lparen var T_rparen T_lbrace stmt T_rbrace 
+      {Ast.Stmt.OpenAlloc (Expr.make (Expr.Var $3,Type.Unknown),$6)}

@@ -1,11 +1,4 @@
-module type ID = 
-sig
-  type t
-  val fromString : string -> t
-  val toString : t -> string
-  val equal : t * t -> bool
-end
-
+open Id
 module Var : ID
 module Tyvar : ID
 module Field : ID
@@ -18,6 +11,7 @@ sig
   val equal : t*t -> bool
   val toString : t -> string
   val isObject : t -> bool
+  val isRegion : t -> bool
 end
 
 module Type : 
@@ -31,6 +25,7 @@ sig
   val equal : t * t -> bool
   val mapTyvars : (Tyvar.t -> t) -> t -> t
   val toString : t -> string
+  val isRegion : t -> bool
 end
 
 module Expr : 
@@ -57,6 +52,9 @@ sig
     | Expr of Expr.t
     | Seq of t list
     | Seq2 of t * t
+    | LetRegion of t
+    | Open of Expr.t * t
+    | OpenAlloc of Expr.t * t
   val dec : Type.t * Var.t * Expr.t -> t
   val assn : Var.t * Expr.t -> t
   val expr : Expr.t -> t

@@ -1,0 +1,21 @@
+class Actor1 extends Object {
+  Actor1 () {
+    /* empty constructor */
+  }
+  void onRecv(Region<LinkedList<Object>> rin) {
+    Region<Object> rout = new Region<Object>(); 
+    open (rin) {
+      LinkedList<Object> xs = rin.get();
+      letregion {
+        LinkedList<Object> sx = xs.reverse(); 
+        Object v = sx.head;
+        openalloc (rout) {
+          Object v' = rout.copy(v);
+          rout.set(v');
+        }
+      } 
+    }
+    rin.giveUp(); 
+    rout.transfer(); 
+  }
+}

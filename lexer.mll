@@ -8,9 +8,13 @@
     [("class"   , T_keyword_class)
     ;("extends" , T_keyword_extends)
     ;("new"     , T_keyword_new)
+    ;("let"     , T_keyword_let)
     ;("super"   , T_keyword_super)
     ;("return"  , T_keyword_return)
-    ;("void"     , T_keyword_void)
+    ;("letregion" , T_keyword_letregion)
+    ;("open"    , T_keyword_open)
+    ;("openalloc" , T_keyword_openalloc)
+    ;("void"    , T_keyword_void)
     ;("int"     , T_keyword_int)
     ;("bool"    , T_keyword_bool)]
 
@@ -51,7 +55,7 @@ rule token = parse
 | '.'               { T_period }
 | ';'               { T_semicolon }
 | '='               { T_assign }
-| (letter | '_') (letter | digit | '_')*
+| (letter | '_') (letter | digit | '_')*("'")*
   { let ident = L.lexeme lexbuf in
     try
       Hashtbl.find keyword_table ident
