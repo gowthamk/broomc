@@ -15,8 +15,11 @@
     ;("open"    , T_keyword_open)
     ;("openalloc" , T_keyword_openalloc)
     ;("void"    , T_keyword_void)
+    ;("Null"    , T_keyword_null)
     ;("int"     , T_keyword_int)
-    ;("bool"    , T_keyword_bool)]
+    ;("bool"    , T_keyword_bool)
+    ;("true"     , T_keyword_true)
+    ;("false"     , T_keyword_false)]
 
   let error msg lexbuf =
     failwith (P.sprintf "error: %s %d-%d\n" msg
@@ -30,6 +33,7 @@
 }
 
 let digit = ['0'-'9']
+let integer = ('-'?)(digit+)
 let lower = ['a'-'z']
 let upper = ['A'-'Z']
 
@@ -38,8 +42,8 @@ let letter = lower | upper
 let newline = ['\n' '\r']
 let whitespace = [' ' '\n' '\r' '\t']
 
-let op_symbol = ['+' '-' '*' '/' '%' '=' '!' '?' '<' '>' '|' '&' '^' '@']
-let op = op_symbol+
+let un_op_symbol = "!"
+let bin_op_symbol = ("+" | "-" | "*" | "/" | "==" | "<" | ">" | "&&" | "||")
 
 rule token = parse
 | whitespace+       { token lexbuf }
@@ -55,6 +59,11 @@ rule token = parse
 | '.'               { T_period }
 | ';'               { T_semicolon }
 | '='               { T_assign }
+| un_op_symbol      {T_un_op (L.lexeme lexbuf)}
+| bin_op_symbol      {T_bin_op (L.lexeme lexbuf)}
+| integer           
+  { let i = int_of_string @@ L.lexeme lexbuf in 
+      T_int i}
 | (letter | '_') (letter | digit | '_')*("'")*
   { let ident = L.lexeme lexbuf in
     try

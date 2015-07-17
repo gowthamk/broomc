@@ -44,6 +44,9 @@
 %token T_assign
 %token <string> T_ident
 %token <string> T_tyvar
+%token <string> T_un_op
+%token <string> T_bin_op
+%token <int> T_int
 %token T_keyword_class
 %token T_keyword_extends
 %token T_keyword_new
@@ -56,6 +59,9 @@
 %token T_keyword_int
 %token T_keyword_bool
 %token T_keyword_void
+%token T_keyword_null
+%token T_keyword_true
+%token T_keyword_false
 %right T_comma
 
 /* Starting non-terminal is prog. Its type is Ast.Class.t list */
@@ -208,6 +214,19 @@ methdec:
     T_rbrace
     { Ast.Method.make $2 $4 $7 $1 }
 
+unary_op:
+  | T_un_op { if $1 = "!" then Prim.Not
+              else failwith "Unknown unary op"}
+binary_op:
+  | T_bin_op 
+      { match $1 with
+          | "+" -> Prim.Plus | "-" -> Prim.Minus
+          | "*" -> Prim.Mult | "/" -> Prim.Div
+          | "==" -> Prim.Equal | ">" -> Prim.GT
+          | "<" -> Prim.LT | "&&" -> Prim.And
+          | "||" -> Prim.Or 
+          | _ -> failwith "Unknown binop"}
+
 exprseq:
   | expr T_comma exprseq {$1 :: $3}
   | expr {[$1]}
@@ -220,6 +239,10 @@ expr:
   | exprnode {Expr.make ($1,Type.Unknown)}
 
 exprnode:
+  | T_keyword_null {Ast.Expr.Null}
+  | T_int {Ast.Expr.Int $1}
+  | T_keyword_true {Ast.Expr.Bool true}
+  | T_keyword_false {Ast.Expr.Bool false}
   | var { Ast.Expr.Var $1 }
   | expr T_period field
     { Ast.Expr.FieldGet($1, $3) }
@@ -229,6 +252,9 @@ exprnode:
     { match $2 with 
       | Ast.Type.ConApp (tycon,targs) -> Expr.New(tycon,targs,$4) 
       | _ -> raise ParseError}
+  | unary_op expr {Expr.UnOpApp ($1,$2)}
+  | expr binary_op expr {Expr.BinOpApp ($1,$2,$3)}
+  | T_lparen exprnode T_rparen {$2}
 
 stmt: 
   | atomstmtseq {Ast.Stmt.Seq $1}
@@ -249,6 +275,8 @@ atomstmt:
         Ast.Stmt.FieldSet (lhsExp,$5)}
   | expr T_semicolon 
       {Ast.Stmt.Expr $1}
+  | T_keyword_return expr T_semicolon
+      {Ast.Stmt.Expr $2}
   | T_keyword_letregion T_lbrace stmt T_rbrace
       {Ast.Stmt.LetRegion $3}
   | T_keyword_open T_lparen var T_rparen T_lbrace stmt T_rbrace 

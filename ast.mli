@@ -1,3 +1,4 @@
+open Utils
 open Id
 module Var : ID
 module Tyvar : ID
@@ -19,7 +20,7 @@ sig
   type t = Int | Bool | Object | Unit
          | ConApp of Tycon.t * t list
          | Tyvar of Tyvar.t
-         | Unknown 
+         | Unknown | Any
   val mkApp : Tycon.t * t list  -> t
   val var : Tyvar.t -> t
   val equal : t * t -> bool
@@ -28,16 +29,30 @@ sig
   val isRegion : t -> bool
 end
 
+module Prim:
+sig
+  type un_op = Not
+  type bin_op = Plus | Minus | Mult | Div
+              | GT | LT | And | Or | Equal
+  val unOpToString : un_op -> string
+  val binOpToString : bin_op -> string
+  val typOfBinOp : bin_op -> ((Type.t*Type.t)*Type.t)
+end
+
 module Expr : 
 sig
   type t
   type node =
-    Int of int
+  | Null
+  | Int of int
   | Bool of bool
   | Var of Var.t
   | FieldGet of t * Field.t
   | MethodCall of t * MethodName.t * t list
   | New of Tycon.t * Type.t list * t list
+  | UnOpApp of Prim.un_op * t
+  | BinOpApp of t * Prim.bin_op * t
+  val null : t
   val node : t -> node
   val typ : t -> Type.t
   val make : node * Type.t -> t
@@ -51,7 +66,6 @@ sig
     | FieldSet of Expr.t * Expr.t
     | Expr of Expr.t
     | Seq of t list
-    | Seq2 of t * t
     | LetRegion of t
     | Open of Expr.t * t
     | OpenAlloc of Expr.t * t
@@ -59,7 +73,6 @@ sig
   val assn : Var.t * Expr.t -> t
   val expr : Expr.t -> t
   val seq : t list -> t
-  val seq2 : t * t -> t
 end
 
 module Method :
@@ -73,7 +86,7 @@ sig
   val ret_type : t -> Type.t
 end
 
-module Con :
+module MakeCon : functor(Type : STRINGABLE) ->
 sig
   type t
   val make : tycon:Tycon.t -> params:(Var.t * Type.t) list ->
@@ -82,6 +95,10 @@ sig
   val params : t -> (Var.t * Type.t) list
   val body : t -> Stmt.t 
 end
+
+module Con : module type of MakeCon(struct 
+                                      include Type
+                                    end)
 
 module Class : 
 sig

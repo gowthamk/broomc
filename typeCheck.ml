@@ -30,10 +30,10 @@ struct
   let assrt (cond,msg) = if cond then () else failwith msg
   let andOf = List.fold_left (&&) true 
 
-  let isBottomTyp = function 
+  let isTopTyp = function 
     | Type.Object -> true
     | Type.ConApp _ -> false
-    | typ -> failwith @@ "isBottomTyp: "^(Type.toString typ)
+    | typ -> failwith @@ "isTopTyp: "^(Type.toString typ)
               ^" is not a class type.\n"
 
   (*
@@ -77,6 +77,7 @@ struct
   let rec isSubType ct tyVE (subTyp,supTyp) = 
     Type.equal (subTyp,supTyp) ||
     match subTyp with 
+      | Type.Any -> true
       | Type.Tyvar v -> isSubType ct tyVE (TyVE.find v tyVE, supTyp)
       | Type.Object -> false
       | Type.ConApp _ -> 
@@ -104,7 +105,7 @@ struct
     end
 
   let rec typeOk ct tyVE typ = match typ with
-    | Type.Int | Type.Bool | Type.Object | Type.Unit -> ()
+    | Type.Any | Type.Int | Type.Bool | Type.Object | Type.Unit -> ()
     | Type.Unknown -> failwith "Unknown type is not ok\n"
     | Type.Tyvar tyvar -> assrt (TyVE.mem tyvar tyVE,
                           "Unknown tyvar: "^(Tyvar.toString tyvar))
@@ -128,7 +129,12 @@ struct
    * What is the type of the field classTyp.f ?
    *)
   let rec ftype ct (classTyp,f) =
-    let _ = if isBottomTyp classTyp then raise Not_found else () in
+    let _ = if isTopTyp classTyp then 
+      begin
+        print_string @@ "Feild "^(Field.toString f)^" not found.\n";
+        raise Not_found;
+      end
+    else () in
     let (tycon,tyargs) = match classTyp with 
       | Type.ConApp (x,y) -> (x,y)
       | _ -> failwith @@ "ftype: "^(Type.toString classTyp)
@@ -148,7 +154,7 @@ struct
   exception Return of arrow_typ 
   let rec mtype ct (classTyp,mname) = 
     try
-      let _ = if isBottomTyp classTyp then raise Not_found else () in
+      let _ = if isTopTyp classTyp then raise Not_found else () in
       let (tycon,tyargs) = match classTyp with 
         | Type.ConApp (x,y) -> (x,y)
         | _ -> failwith @@ "mtype: "^(Type.toString classTyp)
@@ -176,17 +182,40 @@ struct
         | Seq [] -> Type.Unit
         | Seq stmts -> typeOfStmt @@ List.nth stmts 
                                        (List.length stmts - 1)
-        | Seq2 (_,s2) -> typeOfStmt s2
         | _ -> Type.Unit
+
+  let typeOfUnOpApp (op,e) = match op with
+    | Prim.Not -> 
+        let _ = assrt (Type.equal (Expr.typ e,Type.Bool),
+                     "`Not` operator received a non-boolean value") in
+          Type.Bool
+
+  let typeOfBinOpApp (op,e1,e2) = 
+    let (ety1,ety2) = (Expr.typ e1,Expr.typ e2) in
+    let ((ty1,ty2),ty) = Prim.typOfBinOp op in
+    let opStr = Prim.binOpToString op in
+      begin
+        assrt(Type.equal (ety1,ty1) && Type.equal (ety2,ty2),
+              opStr^" argument type mismatch");
+        ty
+      end
 
   let rec elabExpr ct (tyVE,ve) expr =
     let open Expr in 
     let doIt e = elabExpr ct (tyVE,ve) e in
     let typeOfVar v = try VE.find v ve 
-        with Not_found -> failwith @@ "Variable "^(Var.toString v)
-                                                ^" undeclared\n" in
+        with Not_found -> 
+          begin
+            print_string "Var Env is:\n";
+            VE.iter (fun v ty -> 
+              print_string @@ (Var.toString v)^" : "
+                ^(Type.toString ty)^"\n") ve;
+            failwith @@ "Variable "^(Var.toString v)
+                                      ^" undeclared\n";
+          end in
     let expNode = node expr in
       match expNode with 
+        | Null -> make (expNode,Type.Any)
         | Int _ -> make (expNode,Type.Int)
         | Bool _ -> make (expNode,Type.Bool)
         | Var v -> make (expNode,typeOfVar v)
@@ -211,7 +240,7 @@ struct
                 List.iter2 (fun argExpTy argTy -> 
                               subTypeOk ct tyVE (argExpTy,argTy)) 
                   argExpTyps argTyps;
-                make (expNode,retTyp);
+                make (MethodCall (objExp',mname,argExps'),retTyp);
               end
         | New (tycon,tyargs,argExps) -> 
             let classTyp = Type.mkApp (tycon,tyargs) in
@@ -231,36 +260,57 @@ struct
               begin
                 assrt (List.exists validApp ctors,
                        "Invalid `new "^(Type.toString classTyp)^"`\n");
-                make (expNode,classTyp)
+                make (New (tycon,tyargs,argExps'),classTyp)
               end
+        | UnOpApp (op,e) -> 
+            let e' = doIt e in
+            let ty = typeOfUnOpApp (op,e') in
+              make (UnOpApp (op,e'),ty)
+        | BinOpApp (e1,op,e2) ->
+            let (e1',e2') = (doIt e1, doIt e2) in
+            let ty = typeOfBinOpApp (op,e1',e2') in
+              make (BinOpApp (e1',op,e2'),ty)
 
 
   let rec elabStmt ct (tyVE,ve) stmt =
     let open Stmt in 
     let doIt s = elabStmt ct (tyVE,ve) s in
     let doItExp e = elabExpr ct (tyVE,ve) e in
+    let ret stmt = (stmt,ve) in
       match stmt with 
-        | VarDec (t,v,e) -> VarDec (t,v,doItExp e)
-        | Assn (v,e) -> Assn (v,doItExp e)
-        | FieldSet (e1,e2) -> FieldSet (doItExp e1, doItExp e2)
-        | Expr e -> Expr (doItExp e)
-        | Seq stmts -> Seq (List.map doIt stmts)
-        | Seq2 (s1,s2) -> Seq2 (doIt s1, doIt s2)
-        | LetRegion s -> LetRegion (doIt s)
+        | VarDec (varTy,v,e) -> 
+            let e' = doItExp e in
+            let expTy = Expr.typ e' in
+            let _ = subTypeOk ct tyVE (expTy,varTy) in
+            let ve' = VE.add v varTy ve in 
+              (VarDec (varTy,v,e'),ve')
+        | Assn (v,e) -> ret @@ Assn (v,doItExp e)
+        | FieldSet (e1,e2) -> ret @@ FieldSet (doItExp e1, doItExp e2)
+        | Expr e -> ret @@ Expr (doItExp e)
+        | Seq stmts -> 
+            let (stmts',ve') = List.fold_left 
+                 (fun (stmts',ve) stmt -> 
+                    let (stmt',ve') = elabStmt ct (tyVE,ve) stmt in
+                      (List.append stmts' [stmt'],ve')) 
+                 ([],ve) stmts in
+              (Seq stmts',ve')
+        | LetRegion s -> 
+            let (s',ve') = doIt s in
+              (LetRegion s',ve')
         | Open (vexp,s) -> 
             let vexp' = doItExp vexp in
             let ty = Expr.typ vexp' in
             let _ = assrt (Type.isRegion ty, "A variable of non-\
                            \region type cannot be opened.") in
-            let s' = doIt s in
-              Open (vexp',s')
+            let (s',ve') = doIt s in
+              (Open (vexp',s'),ve')
         | OpenAlloc (vexp,s) -> 
             let vexp' = doItExp vexp in
             let ty = Expr.typ vexp' in
             let _ = assrt (Type.isRegion ty, "A variable of non-\
                            \region type cannot be openalloc'd.") in
-            let s' = doIt s in
-              OpenAlloc (vexp',s')
+            let (s',ve') = doIt s in
+              (OpenAlloc (vexp',s'),ve')
 
   let overrideOk ct tyVE (mname,classTyp, mtyp) =
     match classTyp with 
@@ -295,7 +345,7 @@ struct
     let k = CT.find tycon ct in
     let super = Class.super k in
     let _ = overrideOk ct tyVE (name,super, Arrow(argTyps,retTyp)) in
-    let stmt' = elabStmt ct (tyVE,ve) (Method.body meth) in
+    let (stmt',_) = elabStmt ct (tyVE,ve) (Method.body meth) in
     let realRetTyp = typeOfStmt stmt' in
     let _ = subTypeOk ct tyVE (realRetTyp,retTyp) in
       Method.make 
@@ -316,7 +366,7 @@ struct
                     typeOk ct tyVE ty;
                     VE.add arg ty ve'
                   end) params thisVE in
-    let stmt' = elabStmt ct (tyVE,ve) (Con.body ctor) in
+    let (stmt',_) = elabStmt ct (tyVE,ve) (Con.body ctor) in
       Con.make
         ~tycon: tycon ~params: params ~body: stmt'
 
@@ -364,7 +414,6 @@ struct
     let _ =
       begin
         List.iter (typeOk ct tyVE) tyvarBounds;
-        print_string @@ "Super Type: "^(Type.toString super)^"\n";
         typeOk ct tyVE super;
         List.iter (typeOk ct tyVE) fieldTyps;
       end in

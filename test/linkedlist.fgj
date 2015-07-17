@@ -1,0 +1,40 @@
+class LinkedListNode<'a extends Object>  extends Object  {
+    'a val;
+    LinkedListNode<'a>  prev;
+    LinkedListNode<'a>  next;
+    LinkedListNode('a val) {
+        this.val = val;
+        this.prev = Null;
+        this.next = Null;
+    }
+}
+class LinkedList<'a extends Object>  extends Object  {
+    LinkedListNode<'a>  head;
+    int count;
+    LinkedList('a v) {
+        this.head = new LinkedListNode<'a>(v);
+        this.count=1;
+    }
+    void add('a v) {
+        let LinkedListNode<'a> n = new LinkedListNode<'a>(v);
+        n.next = this.head;
+        this.head.prev = n;
+        this.head = n;
+        this.count=this.count+1;
+    }
+    'a head() {
+        return this.head.val;
+    }
+/*
+
+    LinkedList<'a>   reverse(void u) {
+        let LinkedList<'a> xs = new LinkedList<'a>  (this.head.val);
+        let LinkedListNode<'a> cur = this.head.next;
+        while(not (cur== Null)) {
+            xs.add(cur.val);
+            cur = cur.next;
+        }
+        return xs;
+    }
+*/
+}

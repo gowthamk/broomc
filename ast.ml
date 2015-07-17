@@ -36,25 +36,26 @@ struct
   type t = Int | Bool | Object | Unit
          | ConApp of Tycon.t * t list
          | Tyvar of Tyvar.t
-         | Unknown 
+         | Unknown | Any
 
   let mkApp (x,y) = ConApp (x,y)
   let var v = Tyvar v
   let rec equal = function
-    | (Int,Int) | (Bool,Bool) | (Object,Object) | (Unit,Unit) -> true
+    | (Int,Int) | (Bool,Bool) | (Object,Object) 
+    | (Unit,Unit) | (Any,Any) -> true
     | (ConApp (tycon1,typs1), ConApp (tycon2,typs2)) -> 
         Tycon.equal (tycon1,tycon2) && 
         List.for_all2 (fun ty1 ty2 -> equal (ty1,ty2)) typs1 typs2
     | (Tyvar tyv1,Tyvar tyv2) -> Tyvar.equal (tyv1,tyv2)
     | _ -> false
   let rec mapTyvars f t = match t with
-    | Int | Bool | Object | Unknown | Unit -> t
+    | Int | Bool | Object | Unknown | Unit | Any -> t
     | Tyvar v -> f v
     | ConApp (tycon,tyargs) -> 
         ConApp (tycon,List.map (mapTyvars f) tyargs)
   let rec toString = function
     | Int -> "int" | Bool -> "bool" | Object -> "Object"
-    | Unknown -> "?Unknown" | Unit -> "void"
+    | Unknown -> "?Unknown" | Unit -> "void" | Any -> "Any"
     | Tyvar v -> Tyvar.toString v
     | ConApp (tycon,tyargs) -> (Tycon.toString tycon)^
         begin
@@ -66,25 +67,49 @@ struct
     | _ -> false
 end
 
+module Prim =
+struct
+  type un_op = Not
+  type bin_op = Plus | Minus | Mult | Div
+              | GT | LT | And | Or | Equal
+  let unOpToString = function | Not -> "!"
+  let binOpToString = function
+    | Plus -> "+" | Minus -> "-" | Mult -> "*" | Div -> "/"
+    | GT -> ">" | LT -> "<" | And -> "&&" | Or -> "||" | Equal -> "=="
+  let typOfBinOp op = 
+    let boolt = ((Type.Bool,Type.Bool),Type.Bool) in
+    let intt = ((Type.Int,Type.Int),Type.Int) in
+    let intBoolt = ((Type.Int,Type.Int),Type.Bool) in
+      match op with 
+        | Plus | Minus | Mult | Div -> intt
+        | GT | LT | Equal -> intBoolt
+        | And | Or -> boolt
+end
+
 module Expr =
 struct
   type node =
-    Int of int
+    Null
+  | Int of int
   | Bool of bool
   | Var of Var.t
   | FieldGet of t * Field.t
   | MethodCall of t * MN.t * t list
   | New of Tycon.t * Type.t list * t list
+  | UnOpApp of Prim.un_op * t
+  | BinOpApp of t * Prim.bin_op * t
   and t = T of node * Type.t
   let node (T (n,_)) = n
   let typ (T (_,t)) = t
   let make (n,ty) = T (n,ty)
+  let null = make (Null,Type.Any)
   let rec toString exp = 
     let node = node exp in
     let ty = typ exp in
     let tyAnnot str = "("^str^":"^(Type.toString ty)^")" in
     let doIt e = toString e in
       match node with 
+        | Null -> tyAnnot @@ "Null"
         | Int i -> tyAnnot @@ string_of_int i
         | Bool b -> tyAnnot @@ string_of_bool b
         | Var v -> tyAnnot @@ Var.toString v
@@ -98,7 +123,10 @@ struct
         | New (tycon,tyargs,argExps) -> tyAnnot @@
            let tyStr = Type.toString @@ Type.mkApp (tycon,tyargs) in
            let argStr = "("^(printCSV @@ List.map doIt argExps) ^")" in
-             tyStr^argStr
+             "new "^tyStr^argStr
+        | UnOpApp (op,e) -> tyAnnot @@ (Prim.unOpToString op)^(doIt e)
+        | BinOpApp (e1,op,e2) -> tyAnnot @@ (doIt e1)^" "
+                                ^(Prim.binOpToString op)^" "^(doIt e2)
 end
 
 module Stmt = 
@@ -109,7 +137,6 @@ struct
     | FieldSet of Expr.t * Expr.t
     | Expr of Expr.t
     | Seq of t list
-    | Seq2 of t * t
     | LetRegion of t
     | Open of Expr.t * t
     | OpenAlloc of Expr.t * t
@@ -118,7 +145,6 @@ struct
   let assn (v,e) = Assn (v,e)
   let expr e = Expr e
   let seq es = Seq es
-  let seq2 (e1,e2) = Seq2 (e1,e2)
   let rec print stmt = 
     let estr = Expr.toString in
     let tstr = Type.toString in
@@ -162,7 +188,6 @@ struct
               printf "@[<v 2>"; print stmt; printf "@]";
               printf "}";
             end
-        | _ -> failwith "Unimpl."
 end
 
 module Method = 
@@ -201,7 +226,8 @@ struct
         printf "}"
       end
 end
-module Con =
+
+module MakeCon = functor(Type:STRINGABLE) ->
 struct
   type t = {
     tycon      : Tycon.t;
@@ -234,6 +260,11 @@ struct
         printf "}";
       end 
 end
+
+module Con = MakeCon(struct
+                       include Type
+                     end)
+
 module Class =
 struct
   type t = {

@@ -43,8 +43,18 @@ let _ =
       let lexbuff = Lexing.from_channel channel in
       let classes = Parser.prog Lexer.token lexbuff in
       let ct = makeClassTable classes in
+      let _ =
+        begin
+          print_string "Parser output:\n";
+          CT.iter (fun tycon k -> 
+            begin
+              Class.print k;
+              Format.printf "@\n";
+            end ) ct;
+        end in
       let ct' = TypeCheck.doIt ct in
         begin
+          print_string "Post FGJ Type checking:\n";
           CT.iter (fun tycon k -> 
             begin
               Class.print k;
