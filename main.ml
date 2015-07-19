@@ -6,6 +6,9 @@ module CT = Map.Make (struct
 module TypeCheck = TypeCheck.Make (struct
                                     module CT = CT
                                    end)
+module RegionTypeInfer = RegionTypeInfer.Make (struct
+                                                 module CT = CT
+                                               end)
 let non_existence_type = Type.Unknown
 let base_klass_tycon = Tycon.make @@ Id.fromString "Object"
 let base_klass_type = Type.mkApp (base_klass_tycon,[])
@@ -19,8 +22,8 @@ let base_klass = Class.make
 
 let makeClassTable ks =
   let ct = CT.singleton base_klass_tycon base_klass in
-    List.fold_left 
-      (fun ct k ->
+    List.fold_right
+      (fun k ct ->
          begin
            let x = Class.tycon k in 
              if CT.mem x ct then 
@@ -28,7 +31,7 @@ let makeClassTable ks =
                   ^"has already been defined.\n" 
              else ();
            CT.add x k ct
-         end) ct ks
+         end) ks ct
 
 let _ =
   let files = ref [] in
@@ -53,6 +56,7 @@ let _ =
             end ) ct;
         end in
       let ct' = TypeCheck.doIt ct in
+      let _ =
         begin
           print_string "Post FGJ Type checking:\n";
           CT.iter (fun tycon k -> 
@@ -60,6 +64,15 @@ let _ =
               Class.print k;
               Format.printf "@\n";
             end ) ct';
+        end in
+      let ct'' = RegionTypeInfer.doIt ct' in
+        begin
+          print_string "Post Region Type Inference:\n";
+          CT.iter (fun tycon k -> 
+            begin
+              RegionAst.Class.print k;
+              Format.printf "@\n";
+            end ) ct'';
         end
     with
       e -> close_in channel; raise e

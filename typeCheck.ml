@@ -6,6 +6,7 @@ module Make (S:TYPE_CHECK_STRUCTS) =
 struct
   open S
   open Ast
+  open Utils
   open Printf
   module L = List
   module VE = Map.Make (struct
@@ -27,7 +28,6 @@ struct
   type arrow_typ = Arrow of Type.t list * Type.t
 
   let failwith msg = raise (Type_error msg)
-  let assrt (cond,msg) = if cond then () else failwith msg
   let andOf = List.fold_left (&&) true 
 
   let isTopTyp = function 

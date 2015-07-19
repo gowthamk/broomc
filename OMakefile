@@ -55,5 +55,5 @@ FILES += $(removesuffix $(filter %.ml, $(ls $(SOURCE_ROOT_DIRECTORY))))
 
 build: $(OCamlProgram $(PROGRAM), $(FILES)) $(OCamlLibrary $(PROGRAM), $(FILES))
 clean: 
-    $(RM) *.cmx *.cmxa *.cmo *.cmi *.o *.cma *.a *.out *~ \
+    $(RM) *.cmx *.cmxa *.cmo *.cmi *.o *.cma *.a *.annot *.out *~ \
       $(PROGRAM) $(PROGRAM).opt $(OCAML_GENERATED_FILES)
