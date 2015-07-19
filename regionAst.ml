@@ -1,4 +1,5 @@
 open Utils
+open Format
 open Id
 open Ast
 
@@ -12,6 +13,8 @@ struct
   let toString t = t
   let equal (t1,t2) = t1 = t2
 end
+
+module RV = RegionVar
 
 module RegionVarSet = Set.Make (struct
                                   type t = RegionVar.t
@@ -80,6 +83,17 @@ struct
     | prop -> prop
 
   let doSubst = mapRegionVars
+  let rec toString phi =
+    let f = RV.toString in 
+    let g r1 rel r2 = (f r1)^rel^(f r2) in
+      match phi with
+        | True -> "T"
+        | False -> "⊥"
+        | Outlives (r1,r2) -> g r1 "≥" r2
+        | Eq (r1,r2) -> g r1 "=" r2
+        | NotEq (r1,r2) -> g r1 "≠" r2
+        | Conj phis -> printSV "∧" @@ List.map toString phis
+        | Disj phis -> printSV "∨" @@ List.map toString phis
 end
 
 module Type =
@@ -99,7 +113,6 @@ struct
          | Exists of RegionVar.t * t 
   let mkApp (tycon,rAlloc,rBar,tyArgs) = 
     ConApp {tycon=tycon; rAlloc=rAlloc; rBar=rBar; tyArgs=tyArgs;}
-  let toString _ = failwith "Unimpl."
   let rec mapRegionVars f t = 
     let doIt = mapRegionVars f in
       match t with 
@@ -124,7 +137,9 @@ struct
     | Exists (boundRho,t') -> List.filterNotEq boundRho (frv t')
     | _ -> []
   and frvStar ts = List.concat @@ List.map frv ts
+
   let var tyvar = Tyvar tyvar
+
   let rec map f t = match (f t,t) with
     | (Some t',_) -> t'
     | (None, ConApp args) -> 
@@ -137,6 +152,24 @@ struct
           Region args'
     | (None, Exists (rho,rTy)) -> Exists (rho,map f rTy)
     | (None,_) -> t
+
+  let rec toString = function
+    | Int -> "int" | Bool -> "bool" | Unknown -> "?Unknown" 
+    | Unit -> "void" | Any -> "Any"
+    | Object rho -> "Object<"^(RV.toString rho)^">"
+    | Tyvar v -> Tyvar.toString v
+    | ConApp args -> (Tycon.toString args.tycon)^"<"^
+        begin
+          printCSV @@ List.map RV.toString @@ args.rAlloc::args.rBar
+        end^">"^
+        begin
+          if List.length args.tyArgs = 0 then ""
+          else "<"^(printCSV @@ List.map toString args.tyArgs)^">"
+        end
+    | Region {rho;rhoAlloc;rootObjTy} -> 
+        "Region["^(RV.toString rho)^"]<"^(RV.toString rhoAlloc)^"><"
+          ^(toString rootObjTy)^">"
+    | Exists (rho,t) -> "∃"^(RV.toString rho)^"."^(toString t)
 end
 
 module Expr =
@@ -243,5 +276,50 @@ struct
   let ctors k = k.ctors
   let methods k = k.methods
 
-  let print k = failwith "Unimpl."
+  let print k = 
+    let className = Tycon.toString @@ tycon k in
+    let rhoAlloc = rhoAlloc k in
+    let rhoBar = rhoBar k in
+    let rhoStr = printCSV @@ List.map RV.toString @@ 
+                   rhoAlloc::rhoBar in
+    let phiStr = RegionConstraint.toString @@ phi k in
+    let tyvarDecs = tyvars k in
+    let tyvarDectoStr (tyvar,ty) = (Tyvar.toString tyvar)
+              ^" extends "^(Type.toString ty) in
+    let tyvarDecsStr = if List.length tyvarDecs = 0 then ""
+       else "<"^(printCSV @@ List.map tyvarDectoStr tyvarDecs)^">" in
+    let classSig = className^"<"^rhoStr^"|"^phiStr^">"^tyvarDecsStr in
+    let superSig = Type.toString @@ super k in
+    let fdecs = fields k in
+    let fdecToStr (f,ty) = (Type.toString ty)^" "^(Field.toString f)
+                            ^";" in
+    let cons = ctors k in
+    let meths = methods k in
+      begin
+        printf "%s" @@ "class "^classSig^" extends "^superSig^" {";
+        printf "@?";
+        printf "@[<v 2>";
+        List.iter (fun fdec -> 
+          begin
+            printf "@\n";
+            printf "%s" @@ fdecToStr fdec;
+          end) fdecs;
+        (* ctors *)
+        (*
+        List.iter (fun con ->
+          begin
+            printf "@\n";
+            Con.print con;
+          end) cons;
+        (* methods *)
+        List.iter (fun m ->
+          begin
+            printf "@\n";
+            Method.print m;
+          end) meths;
+        printf "@]";
+         *)
+        printf "@\n";
+        printf "}";
+      end
 end

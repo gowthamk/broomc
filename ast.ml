@@ -293,14 +293,20 @@ struct
 
   let print k = 
     let className = Tycon.toString @@ tycon k in
-    let superName = Type.toString @@ super k in
+    let tyvarDecs = tyvars k in
+    let tyvarDectoStr (tyvar,ty) = (Tyvar.toString tyvar)
+              ^" extends "^(Type.toString ty) in
+    let tyvarDecsStr = if List.length tyvarDecs = 0 then ""
+       else "<"^(printCSV @@ List.map tyvarDectoStr tyvarDecs)^">" in
+    let classSig = className^tyvarDecsStr in
+    let superSig = Type.toString @@ super k in
     let fdecs = fields k in
     let fdecToStr (f,ty) = (Type.toString ty)^" "^(Field.toString f)
                             ^";" in
     let cons = ctors k in
     let meths = methods k in
       begin
-        printf "%s" @@ "class "^className^" extends "^superName^" {";
+        printf "%s" @@ "class "^classSig^" extends "^superSig^" {";
         printf "@?";
         printf "@[<v 2>";
         List.iter (fun fdec -> 

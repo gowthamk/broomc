@@ -207,7 +207,7 @@ struct
 
   let elabClass (ct':RegionAst.Class.t CT.t) (k:Ast.Class.t) =
     let hdB = elaborateHeader ct' k in
-      failwith "Unimpl."
+      hdB
 
   let elabClassTable (ct : Ast.Class.t CT.t) =
     CT.fold (fun tycon k ct' -> 

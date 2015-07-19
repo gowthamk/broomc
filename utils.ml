@@ -3,10 +3,12 @@
  *)
 
 let assrt (cond,msg) = if cond then () else failwith msg
-let rec printCSV = function
+let rec printSV sep = function
   | [] -> ""
   | [str] -> str
-  | str::strs -> str^","^(printCSV strs)
+  | str::strs -> str^sep^(printSV sep strs)
+
+let printCSV = printSV ","
 
 let mkUidGen idBase =
   let count = ref 0 in
