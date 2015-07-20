@@ -10,8 +10,10 @@ struct
   type t = string
 
   let fresh = mkUidGen "R"
-  let toString t = t
+  let dummy = mkUidGen "--dummy--" ()
   let equal (t1,t2) = t1 = t2
+  let isDummy t = equal (t,dummy)
+  let toString t = t
 end
 
 module RV = RegionVar
@@ -31,6 +33,18 @@ struct
           | Conj of t list
           | Disj of t list
 
+  let rec toString phi =
+    let f = RV.toString in 
+    let g r1 rel r2 = (f r1)^rel^(f r2) in
+      match phi with
+        | True -> "T"
+        | False -> "⊥"
+        | Outlives (r1,r2) -> g r1 "≥" r2
+        | Eq (r1,r2) -> g r1 "=" r2
+        | NotEq (r1,r2) -> g r1 "≠" r2
+        | Conj phis -> printSV " ∧ " @@ List.map toString phis
+        | Disj phis -> printSV " ∨ " @@ List.map toString phis
+
   let truee = True
 
   let equal (rho1,rho2) = 
@@ -40,22 +54,31 @@ struct
     if RegionVar.equal (rho1,rho2) then False else NotEq (rho1,rho2)
 
   let conj l = 
+    (*
+    let raw_bt = Printexc.get_callstack 5 in
+    let _ = 
+      begin
+        print_string "conj backtrace:\n";
+        print_string @@ Printexc.raw_backtrace_to_string raw_bt;
+        print_string "\n"
+      end in
+     *)
     let l' = List.fold_right 
                (fun prop props -> match prop with
                   | Conj props' -> List.append props' props
                   | _ -> prop::props) l [] in
-      if List.existsEq False l then False
-      else match List.filterNotEq True l with 
-            | [] -> True | _ -> Conj l'
+      if List.existsEq False l' then False
+      else match List.filterNotEq True l' with 
+            | [] -> True | l'' -> Conj l''
 
   let disj l = 
     let l' = List.fold_right 
                (fun prop props -> match prop with
                   | Disj props' -> List.append props' props
                   | _ -> prop::props) l [] in
-      if List.existsEq True l then True
+      if List.existsEq True l' then True
       else match List.filterNotEq False l with 
-            | [] -> True | _ -> Disj l'
+            | [] -> True | l'' -> Disj l''
 
   let outlives (rhoLong,rhoShort) = Outlives (rhoLong,rhoShort)
 
@@ -83,17 +106,19 @@ struct
     | prop -> prop
 
   let doSubst = mapRegionVars
-  let rec toString phi =
-    let f = RV.toString in 
-    let g r1 rel r2 = (f r1)^rel^(f r2) in
-      match phi with
-        | True -> "T"
-        | False -> "⊥"
-        | Outlives (r1,r2) -> g r1 "≥" r2
-        | Eq (r1,r2) -> g r1 "=" r2
-        | NotEq (r1,r2) -> g r1 "≠" r2
-        | Conj phis -> printSV "∧" @@ List.map toString phis
-        | Disj phis -> printSV "∨" @@ List.map toString phis
+end
+
+module ConstraintSolve = 
+struct
+  module CS = ConstraintSolver.Make (struct
+                                       module Symbol = RegionVar
+                                       module Constraint = 
+                                       struct
+                                         type symbol_t = RegionVar.t
+                                         include RegionConstraint
+                                       end
+                                     end)
+  include CS
 end
 
 module Type =
@@ -131,8 +156,13 @@ struct
 
   let rec frv = function
     | Object r -> [r]
-    | ConApp args -> args.rAlloc :: 
-                      (List.concat [args.rBar; frvStar args.tyArgs])
+    | ConApp args -> 
+      (*
+       * Relying on informal invariant that dummy rho only occurs as 
+       * allocation argument to ConApp.
+       *)
+        let rest = List.concat [args.rBar; frvStar args.tyArgs] in
+          if RV.isDummy args.rAlloc then rest else args.rAlloc::rest
     | Region args -> args.rho :: args.rhoAlloc :: (frv args.rootObjTy)
     | Exists (boundRho,t') -> List.filterNotEq boundRho (frv t')
     | _ -> []

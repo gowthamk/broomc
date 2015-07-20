@@ -4,9 +4,11 @@ open Id
 module RegionVar :
 sig
   type t
+  val dummy : t
   val toString : t -> string
   val fresh : unit -> t
   val equal : t * t -> bool
+  val isDummy : t -> bool
 end
 
 module RegionVarSet : Set.S with type elt = RegionVar.t
@@ -29,6 +31,16 @@ sig
   val conj : t list -> t
   val disj : t list -> t
   val mapRegionVars : (RegionVar.t -> RegionVar.t) -> t -> t
+end
+
+module ConstraintSolve :
+sig
+  type sol_t = {substFn: RegionVar.t -> RegionVar.t;
+                residue: RegionConstraint.t;}
+
+  val normalize : RegionConstraint.t -> sol_t
+  val abduce : (RegionConstraint.t * RegionConstraint.t) 
+              -> RegionConstraint.t
 end
 
 module Type :

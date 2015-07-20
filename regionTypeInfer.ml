@@ -90,7 +90,7 @@ struct
                       rBar = List.tl rargs; tyArgs = tyargs';}
           with | Not_found -> 
             let tyargs' = List.map (templateTy ct') tyargs in
-              ConApp {tycon=tycon; rAlloc = Rho.fresh();
+              ConApp {tycon=tycon; rAlloc = Rho.dummy;
                       rBar = []; tyArgs = tyargs';}
 
   let allocRgn = let open Type in function
@@ -161,6 +161,12 @@ struct
 
   let elaborateHeader ct' k = 
     let hdK= headerTemplate ct' k in
+    let _ =
+        begin
+          print_string "Header template:\n";
+          Class.print hdK;
+          Format.printf "@\n";
+        end in
     (* Recursive occurances of tycon are ok'ed under 
      * extended class table (ct'') *)
     let tycon = (A.Class.tycon k) in
