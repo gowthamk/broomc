@@ -47,6 +47,8 @@ struct
 
   let truee = True
 
+  let falsee = False
+
   let equal (rho1,rho2) = 
     if RegionVar.equal (rho1,rho2) then True else Eq (rho1,rho2)
 
@@ -108,6 +110,8 @@ struct
   let doSubst = mapRegionVars
 end
 
+module Phi = RegionConstraint
+
 module ConstraintSolve = 
 struct
   module CS = ConstraintSolver.Make (struct
@@ -136,8 +140,19 @@ struct
          | ConApp of con_app_t
          | Region of region_t
          | Exists of RegionVar.t * t 
+
   let mkApp (tycon,rAlloc,rBar,tyArgs) = 
     ConApp {tycon=tycon; rAlloc=rAlloc; rBar=rBar; tyArgs=tyArgs;}
+
+  let rec mapTyvars f t = match t with
+    | Int | Bool | Object _ | Unknown | Unit | Any -> t
+    | Tyvar v -> f v
+    | ConApp args -> ConApp {args with 
+                      tyArgs = List.map (mapTyvars f) args.tyArgs} 
+    | Region args -> Region {args with 
+                                 rootObjTy = mapTyvars f args.rootObjTy}
+    | Exists (rho,t') -> Exists (rho, mapTyvars f t')
+
   let rec mapRegionVars f t = 
     let doIt = mapRegionVars f in
       match t with 
@@ -200,22 +215,63 @@ struct
         "Region["^(RV.toString rho)^"]<"^(RV.toString rhoAlloc)^"><"
           ^(toString rootObjTy)^">"
     | Exists (rho,t) -> "∃"^(RV.toString rho)^"."^(toString t)
+
+  let rec erase = let module ATy = Ast.Type in function
+    | Int -> ATy.Int | Bool -> ATy.Bool | Unknown -> ATy.Unknown
+    | Any -> ATy.Any | Unit -> ATy.Unit | Tyvar v -> ATy.Tyvar v
+    | Object _ -> ATy.Object 
+    | ConApp {tycon;tyArgs} -> ATy.ConApp (tycon, List.map erase tyArgs)
+    | Region {rootObjTy} -> 
+        ATy.ConApp (Ast.Tycon.make @@ Id.fromString "Region", 
+                    [erase rootObjTy])
+    | Exists (_,t) -> erase t
+
+  let rec equal = function 
+    | (Int,Int) | (Bool,Bool) | (Unit,Unit) | (Any,Any) -> Phi.truee
+    | (Tyvar v1, Tyvar v2) -> if Tyvar.equal (v1,v2) 
+                                then Phi.truee else Phi.falsee
+    | (Object rho1, Object rho2) -> Phi.equal (rho1,rho2)
+    | (ConApp args1,ConApp args2) -> 
+        if Tycon.equal (args1.tycon, args2.tycon) then
+          let c1 = Phi.equal (args1.rAlloc,args2.rAlloc) in
+          let c2s = List.map2 (curry Phi.equal) 
+                      args1.rBar args2.rBar in
+          let c3s = List.map2 (curry equal)
+                      args1.tyArgs args2.tyArgs in
+            Phi.conj @@ List.concat [[c1]; c2s; c3s]
+        else
+            Phi.falsee
+    | (Region args1,Region args2) -> 
+        Phi.conj [Phi.equal (args1.rho, args2.rho);
+                  Phi.equal (args1.rhoAlloc, args2.rhoAlloc);
+                  equal (args1.rootObjTy,args2.rootObjTy)]
+    | (Exists (rho1,t1), Exists (rho2,t2)) ->
+        let substFn = fun rho -> if RegionVar.equal (rho,rho2) 
+                                    then rho1 else rho in
+        let t2' = mapRegionVars substFn t2 in
+          equal (t1,t2')
+    | _ -> Phi.falsee 
 end
 
 module Expr =
 struct
-  type t
   type method_call_t = {meth: t * MethodName.t;
                         rAlloc: RegionVar.t;
                         rBar: RegionVar.t list;
                         args: t list}
-  type node =
+  and node =
       Int of int
     | Bool of bool
     | Var of Var.t 
     | FieldGet of t * Field.t
     | MethodCall of method_call_t
     | New of Type.t * t list
+    | Pack of RegionVar.t * t
+  and t = T of node * Type.t
+  let typ (T (_,t)) = t
+  let node (T (n,_)) = n
+  let make (n,ty) = T (n,ty)
+  let mapRegionVars f e = failwith "Unimpl."
 end
 
 module Stmt =
@@ -234,6 +290,31 @@ struct
     | Open of Expr.t * t
     | OpenAlloc of Expr.t * t
     | UnpackDec of unpack_dec_t
+
+  let rec mapRegionVars f t = 
+    let doIt = mapRegionVars f in
+    let doItTy = Type.mapRegionVars f in
+    let doItExp = Expr.mapRegionVars f in 
+      match t with
+        | VarDec (ty,v,e) -> VarDec (doItTy ty, v, doItExp e)
+        | Assn (v,e) -> Assn (v,doItExp e)
+        | FieldSet (e1,e2) -> FieldSet (doItExp e1, doItExp e2) 
+        | Expr e -> Expr (doItExp e)
+          (* Note: The following simple substitution for Seq is
+           * unsound, as an UnpackDec stmt can introduce a new rho, 
+           * which should not be substituted in subsequent stmts. 
+           * We are ignoring this for now *)
+        | Seq ts -> Seq (List.map doIt ts)
+        | LetRegion (rho,stmt) -> 
+            mapRegionVars (fun rho' -> 
+                             if RegionVar.equal (rho,rho') 
+                             then rho else f rho') stmt
+        | Open (e,stmt) -> Open (doItExp e, doIt stmt)
+        | OpenAlloc (e,stmt) -> OpenAlloc (doItExp e, doIt stmt)
+        | UnpackDec args -> UnpackDec {args with ty = doItTy args.ty;
+                                  unpackExp = doItExp args.unpackExp}
+
+  let rec print stmt = failwith "Unimpl."
 end
 
 module Method =
@@ -268,7 +349,8 @@ struct
 end
 
 module Con = MakeCon(struct
-                       include Type
+                       module Type = Type
+                       module Stmt = Stmt
                      end)
 module Class =
 struct

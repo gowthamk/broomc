@@ -227,8 +227,12 @@ struct
       end
 end
 
-module MakeCon = functor(Type:STRINGABLE) ->
+module MakeCon = functor(S : sig
+                               module Type : STRINGABLE
+                               module Stmt: PRINTABLE
+                             end) ->
 struct
+  open S
   type t = {
     tycon      : Tycon.t;
     params     : (Var.t * Type.t) list;
@@ -262,7 +266,8 @@ struct
 end
 
 module Con = MakeCon(struct
-                       include Type
+                       module Type = Type
+                       module Stmt = Stmt
                      end)
 
 module Class =
@@ -290,6 +295,18 @@ struct
   let fields k = k.fields
   let ctors k = k.ctors
   let methods k = k.methods
+
+  (*let ctor k argTys = 
+    let validApp ctor = 
+      let paramTys = List.map snd (Con.params ctor) in
+        andOf [
+          List.length paramTys = List.length argTys;
+          List.for_all2 (fun argExpTy paramTy -> 
+                isSubType ct tyVE (argExpTy,paramTy)) 
+            argTys paramTys
+        ] in
+    let ctors = Class.ctors k in
+      List.find validApp ctors*)
 
   let print k = 
     let className = Tycon.toString @@ tycon k in

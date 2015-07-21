@@ -15,13 +15,9 @@ module RegionVarSet : Set.S with type elt = RegionVar.t
 
 module RegionConstraint: 
 sig
-  type t (*= True 
-          | Outlives of RegionVar.t * RegionVar.t 
-          | Equality of RegionVar.t * RegionVar.t 
-          | In of RegionVar.t * RegionVarSet.t
-          | NotIn of RegionVar.t * RegionVarSet.t
-          | Conj of t list*)
+  type t 
   val truee: t
+  val falsee : t
   val equal : RegionVar.t * RegionVar.t -> t
   val notEqual : RegionVar.t * RegionVar.t -> t
   val outlives : RegionVar.t * RegionVar.t -> t
@@ -60,11 +56,14 @@ sig
          | Exists of RegionVar.t * t 
   val mkApp : Tycon.t * RegionVar.t * RegionVar.t list * t list -> t
   val toString : t -> string
+  val mapTyvars : (Tyvar.t -> t) -> t -> t
   val mapRegionVars : (RegionVar.t -> RegionVar.t) -> t -> t
   val map : (t -> t option) -> t -> t
   val frv : t -> RegionVar.t list
   val frvStar : t list -> RegionVar.t list
   val var : Tyvar.t -> t
+  val erase : t -> Ast.Type.t
+  val equal : t * t -> RegionConstraint.t
 end
 
 module Expr : 
@@ -81,6 +80,9 @@ sig
     | FieldGet of t * Field.t
     | MethodCall of method_call_t
     | New of Type.t * t list
+    | Pack of RegionVar.t * t 
+  val typ : t -> Type.t
+  val make: node * Type.t -> t
 end
 
 module Stmt :
@@ -99,6 +101,8 @@ sig
     | Open of Expr.t * t
     | OpenAlloc of Expr.t * t
     | UnpackDec of unpack_dec_t
+  val mapRegionVars : (RegionVar.t -> RegionVar.t) -> t -> t
+  val print : t -> unit
 end
 
 module Method :
@@ -120,13 +124,24 @@ sig
   val ret_type : t -> Type.t
 end
 
-module Con : module type of MakeCon(struct 
-                                      include Type
+module Con : module type of MakeCon(struct
+                                      module Type = Type
+                                      module Stmt = Stmt
                                     end)
 
 module Class : 
 sig
-  type t
+  type t = {
+    tycon    : Tycon.t;
+    rhoAlloc : RegionVar.t;
+    rhoBar   : RegionVar.t list;
+    phi      : RegionConstraint.t;
+    tyvars   : (Tyvar.t * Type.t) list;
+    super    : Type.t;
+    fields   : (Field.t * Type.t) list;
+    ctors    : Con.t list;
+    methods  : Method.t list;
+  }
   val make : tycon:Tycon.t ->
              rhoAlloc: RegionVar.t ->
              rhoBar: RegionVar.t list ->

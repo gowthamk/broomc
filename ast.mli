@@ -73,6 +73,7 @@ sig
   val assn : Var.t * Expr.t -> t
   val expr : Expr.t -> t
   val seq : t list -> t
+  val print : t -> unit
 end
 
 module Method :
@@ -86,8 +87,12 @@ sig
   val ret_type : t -> Type.t
 end
 
-module MakeCon : functor(Type : STRINGABLE) ->
+module MakeCon : functor(S: sig
+                              module Type : STRINGABLE
+                              module Stmt: PRINTABLE
+                            end) ->
 sig
+  open S
   type t
   val make : tycon:Tycon.t -> params:(Var.t * Type.t) list ->
                body:Stmt.t -> t
@@ -96,8 +101,9 @@ sig
   val body : t -> Stmt.t 
 end
 
-module Con : module type of MakeCon(struct 
-                                      include Type
+module Con : module type of MakeCon(struct
+                                      module Type = Type
+                                      module Stmt = Stmt
                                     end)
 
 module Class : 

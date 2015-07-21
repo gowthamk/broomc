@@ -7,16 +7,9 @@ struct
   open S
   open Ast
   open Utils
+  open Envs
   open Printf
   module L = List
-  module VE = Map.Make (struct
-                          type t = Var.t
-                          let compare = compare
-                        end)
-  module TyVE = Map.Make (struct
-                          type t = Tyvar.t
-                          let compare = compare
-                        end)
   module S = Set.Make (struct
                         type t = int
                         let compare = compare
@@ -28,7 +21,6 @@ struct
   type arrow_typ = Arrow of Type.t list * Type.t
 
   let failwith msg = raise (Type_error msg)
-  let andOf = List.fold_left (&&) true 
 
   let isTopTyp = function 
     | Type.Object -> true
@@ -74,19 +66,22 @@ struct
     let actualSuper = Type.mapTyvars substfn formalSuper in
       actualSuper
 
-  let rec isSubType ct tyVE (subTyp,supTyp) = 
+  let rec isSubtype ct tyVE (subTyp,supTyp) = 
     Type.equal (subTyp,supTyp) ||
     match subTyp with 
       | Type.Any -> true
-      | Type.Tyvar v -> isSubType ct tyVE (TyVE.find v tyVE, supTyp)
+        (* A tyvar cannot be subtype of another tyvar.
+         * If 'a <: A and 'b <: B and B <: A, then we cannot derive 
+         * 'b <: 'a. *)
+      | Type.Tyvar v -> isSubtype ct tyVE (TyVE.find v tyVE, supTyp)
       | Type.Object -> false
       | Type.ConApp _ -> 
           let superOfSubTyp = superOfClassTy ct subTyp in
-            isSubType ct tyVE (superOfSubTyp,supTyp)
+            isSubtype ct tyVE (superOfSubTyp,supTyp)
       | _ -> false
 
-  let rec subTypeOk ct tyVE (subTyp,supTyp) = 
-    assrt (isSubType ct tyVE (subTyp,supTyp), 
+  let rec subtypeOk ct tyVE (subTyp,supTyp) = 
+    assrt (isSubtype ct tyVE (subTyp,supTyp), 
            "Invalid: "^(Type.toString subTyp)^" <: "
                          ^(Type.toString supTyp)^"\n")
 
@@ -101,7 +96,7 @@ struct
       List.iter2 (fun argTy1 argTy2 -> assrt (Type.equal (argTy1,argTy2),
                       "Invalid method overriding\n")) 
         argTys1 argTys2;
-      subTypeOk ct tyVE (retTy1, retTy2);
+      subtypeOk ct tyVE (retTy1, retTy2);
     end
 
   let rec typeOk ct tyVE typ = match typ with
@@ -122,7 +117,7 @@ struct
         let tyvarBounds' = List.map (Type.mapTyvars substfn) 
                              tyvarBounds in
         let _ = List.iter2 (fun tyarg tyvarBound' -> 
-                              subTypeOk ct tyVE (tyarg,tyvarBound'))
+                              subtypeOk ct tyVE (tyarg,tyvarBound'))
                   tyargs tyvarBounds' in
           ()
   (*
@@ -238,7 +233,7 @@ struct
                  * argExpTyps <: argTyps
                  *)
                 List.iter2 (fun argExpTy argTy -> 
-                              subTypeOk ct tyVE (argExpTy,argTy)) 
+                              subtypeOk ct tyVE (argExpTy,argTy)) 
                   argExpTyps argTyps;
                 make (MethodCall (objExp',mname,argExps'),retTyp);
               end
@@ -253,7 +248,7 @@ struct
                 andOf [
                   List.length paramTys = List.length argExpTyps;
                   List.for_all2 (fun argExpTy paramTy -> 
-                        isSubType ct tyVE (argExpTy,paramTy)) 
+                        isSubtype ct tyVE (argExpTy,paramTy)) 
                     argExpTyps paramTys
                 ] in
             let ctors = Class.ctors k in
@@ -281,7 +276,7 @@ struct
         | VarDec (varTy,v,e) -> 
             let e' = doItExp e in
             let expTy = Expr.typ e' in
-            let _ = subTypeOk ct tyVE (expTy,varTy) in
+            let _ = subtypeOk ct tyVE (expTy,varTy) in
             let ve' = VE.add v varTy ve in 
               (VarDec (varTy,v,e'),ve')
         | Assn (v,e) -> ret @@ Assn (v,doItExp e)
@@ -347,7 +342,7 @@ struct
     let _ = overrideOk ct tyVE (name,super, Arrow(argTyps,retTyp)) in
     let (stmt',_) = elabStmt ct (tyVE,ve) (Method.body meth) in
     let realRetTyp = typeOfStmt stmt' in
-    let _ = subTypeOk ct tyVE (realRetTyp,retTyp) in
+    let _ = subtypeOk ct tyVE (realRetTyp,retTyp) in
       Method.make 
         ~name: name ~params: params ~body: stmt' ~ret_type: retTyp
 
