@@ -27,6 +27,7 @@ sig
   val conj : t list -> t
   val disj : t list -> t
   val mapRegionVars : (RegionVar.t -> RegionVar.t) -> t -> t
+  val toString : t -> string
 end
 
 module ConstraintSolve :
@@ -74,7 +75,8 @@ sig
                         rBar: RegionVar.t list;
                         args: t list}
   type node =
-      Int of int
+    | Null
+    | Int of int
     | Bool of bool
     | Var of Var.t 
     | FieldGet of t * Field.t

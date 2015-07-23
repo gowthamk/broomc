@@ -153,15 +153,21 @@ struct
   let rec subtypeOk ct' (liveRhos,tyVE) (subTy,supTy) =
     let open Type in
     let subtype_ok = subtypeOk ct' (liveRhos,tyVE) in
+    let areEq = Type.equal (subTy,supTy) in
+    let areSub =
       match (subTy,supTy) with
-        | (Tyvar tyv,_) -> subtype_ok (TyVE.find tyv tyVE,supTy)
+        | (Any, Object _) | (Any, Region _) 
+        | (Any, ConApp _) -> Phi.truee (* Null *)
+        | (Tyvar tyv, Object _) | (Tyvar tyv, Region  _)
+        | (Tyvar tyv, ConApp _) -> subtype_ok (TyVE.find tyv tyVE,supTy)
         | (ConApp args1,ConApp args2) -> 
             if Tycon.equal (args1.tycon, args2.tycon) then
-              Type.equal (subTy,supTy)
+              Phi.falsee (* areEq will anyway be true *)
             else
               let superOfSubTy = superOfClassTy ct' subTy in
                 subtype_ok (superOfSubTy,supTy)
-        | _ -> Type.equal (subTy,supTy)
+        | _ -> Phi.falsee in
+      Phi.disj [areEq; areSub]
 
   (*
    * What is the type of method classTyp.mname ?
@@ -199,6 +205,19 @@ struct
            argTys = actualArgTys; 
            retTy = actualRetTy}
     with | Return x -> x
+
+  let ctype ct' (classTyp,ctor) = 
+    let (tycon,rargs,tyargs) = match classTyp with 
+      | Type.ConApp {Type.tycon; rAlloc; rBar; tyArgs} -> 
+          (tycon, rAlloc::rBar, tyArgs) 
+      | _ -> exit 1 in
+    let (psiRho, psiAlpha) = unifyTyconArgs ct' tycon rargs tyargs in
+    let psiRhoInTy = Type.mapRegionVars psiRho in
+    let psiAlphaInTy = Type.mapTyvars psiAlpha in
+    let formalArgTys = List.map snd @@ Con.params ctor in
+    let actualArgTys = List.map psiRhoInTy formalArgTys |>
+                         List.map psiAlphaInTy in
+      actualArgTys
 
   let rec ftype ct' (classTyp,f) =
     let _ = if isTopTyp classTyp then raise Not_found else () in
@@ -254,6 +273,7 @@ struct
       elabPackExpr ct' ctxt e (Expr.typ e, ty) in
     let ret e = (e,Phi.truee) in
       match node with 
+        | A.Expr.Null -> ret @@ make (Null,Type.Any)
         | A.Expr.Int i -> ret @@ make (Int i,Type.Int) 
         | A.Expr.Bool b -> ret @@ make (Bool b,Type.Bool) 
         | A.Expr.Var v -> ret @@ make (Var v,rgn_type_of_var v)
@@ -287,12 +307,21 @@ struct
             let c = Phi.conj @@List.append (c1::c2s) (c3::c4::c5s) in
               (Expr.make (node',actualRetTy), c)
         | A.Expr.New (tycon,tyargs,argExps) -> 
+            let print_phi str phi =
+              begin
+                print_string @@ "Constraints from `new`("^str^"):\n";
+                print_string @@ (Phi.toString phi)^"\n";
+              end in
             let classTyp' = templateTy @@ 
                             A.Type.ConApp (tycon,tyargs) in
             let c1 = type_ok classTyp' in
+            let _ = print_phi "c1" c1 in
             let rhoAlloc = allocRgn classTyp' in
-            let (argExps',c2s) = List.split @@ List.map 
+            let c2 = Phi.equal(rhoAlloc,rAlloc) in
+            let _ = print_phi "c2" c2 in
+            let (argExps',c3s) = List.split @@ List.map 
                                                  doIt argExps in
+            let _ = print_phi "c3s" (Phi.conj c3s) in
             let argExpTys' = List.map Expr.typ argExps' in
             let k = CT.find tycon ct' in
             (* We pick applicable ctor based on Java semantics *)
@@ -309,16 +338,16 @@ struct
                         argExpTys paramTys
                 else false in
             let ctor = List.find applicableCtor @@ Class.ctors k in
-            let argTys' = List.map snd @@ Con.params ctor in
-            let (argExps'',c3s) = List.split @@ 
+            let argTys' = ctype ct' (classTyp',ctor) in
+            let (argExps'',c4s) = List.split @@ 
                         List.map2 maybePackExpr argExps' argTys' in
+            let _ = print_phi "c4s" (Phi.conj c4s) in
             (* Currently, we only allow objects to be allocated in
              * inAllocCtxt *)
-            let cOutlives = Phi.equal(rhoAlloc,rAlloc) in
             let node' = Expr.New (classTyp',argExps'') in
             let c = Phi.conj @@ List.concat 
-                                  [[c1]; c2s; c3s; [cOutlives]] in
-              (Expr.make (node',classTyp'),c)
+                                  [[c1;c2]; c3s; c4s] in
+                  (Expr.make (node',classTyp'),c)
         | _ -> failwith "Unimpl."
 
   let rec elabStmt ct' ctxt stmt = 
@@ -413,7 +442,6 @@ struct
         begin
           print_string "Header template:\n";
           Class.print hdK;
-          Format.printf "@\n";
         end in
     (* Recursive occurances of tycon are ok'ed under 
      * extended class table (ct'') *)
@@ -461,31 +489,35 @@ struct
 
   let bootStrapVE  ct' ve tycon =
     let k = CT.find tycon ct' in
-    let tyvars = Class.tyvars k |> 
-                   List.map (fun (tyvar,bound) -> tyvar) in
-    let tyargs = List.map A.Type.var tyvars in
-    let thisTyp = A.Type.mkApp (tycon,tyargs) in
-    let thisRgnTyp = templateTy ct' thisTyp in
+    let tyvars = Class.tyvars k |> List.map fst in
+    let tyargs = List.map Type.var tyvars in
+    let (rAlloc, rBar) = (Class.rhoAlloc k, Class.rhoBar k) in
+    let thisRgnTyp = Type.mkApp (tycon,rAlloc,rBar,tyargs) in
     let thisVar = Var.fromString "this" in
       VE.add thisVar thisRgnTyp ve
 
-  let elabCtor ct' (ctor:A.Con.t) hdK = 
+  let elabCtor ct' (ctor:A.Con.t)= 
+    let tycon = A.Con.tycon ctor in
+    let hdK = CT.find tycon ct' in
     let rhoAlloc = Class.rhoAlloc hdK in
     let rhoBar = Class.rhoBar hdK in
     let phi = Class.phi hdK in
     let (tyvars,tyvarBounds) = List.split (Class.tyvars hdK) in
     let super = Class.super hdK in
     let (fields,fieldTyps) = List.split (Class.fields hdK) in
+    let otherCtors = Class.ctors hdK in
     let allRhos = RVSet.of_list @@ rhoAlloc::rhoBar in
     let liveRhos = RVSet.of_list @@ rhoAlloc::rhoBar in
-    (* Recursive occurances of tycon need
-     * extended class table (ct'') *)
-    let tycon = (Class.tycon hdK) in
-    let ct'' = CT.add tycon hdK ct' in
-    let templateTy = templateTy ct'' in
-    let type_ok = typeOk ct'' (allRhos, liveRhos) in
     let (params,paramTys) = List.split @@ A.Con.params ctor in
-    let paramTysX = List.map templateTy paramTys in
+    let paramTysX = List.map (templateTy ct') paramTys in
+    (* Recursive occurances of "new" need
+     * extended class table (ct'') *)
+    let ctorX = Con.make ~tycon: tycon 
+                 ~params: (List.combine params paramTysX)
+                 ~body: (Stmt.Seq []) in
+    let consKX = {hdK with Class.ctors = ctorX::otherCtors} in
+    let ct'' = CT.add tycon consKX ct' in
+    let type_ok = typeOk ct'' (allRhos, liveRhos) in
     let c1 = Phi.conj @@ List.map type_ok paramTysX in
     let thisVE = bootStrapVE ct'' (VE.empty) tycon in
     let extendedVE = List.fold_right2 VE.add 
@@ -495,9 +527,9 @@ struct
     (*
      * inAllocCtxt for ctor body is same as that of the class.
      *)
-      elabStmt ct' {allRhos = allRhos; liveRhos = liveRhos; 
-                    tyVE = tyVE; ve = extendedVE; 
-                    rhoAlloc = rhoAlloc;} (A.Con.body ctor) in
+      elabStmt ct'' {allRhos = allRhos; liveRhos = liveRhos; 
+                     tyVE = tyVE; ve = extendedVE; 
+                     rhoAlloc = rhoAlloc;} (A.Con.body ctor) in
     let cOutlives = List.map 
                 (fun rho -> Phi.outlives (rho,rhoAlloc)) rhoBar in
     let c = Phi.conj @@ c1::c2::phi::cOutlives in
@@ -523,26 +555,36 @@ struct
                (fun rho -> Phi.outlives (rho,rhoAlloc')) rhoBar' in
     let phi' = CS.abduce (ctxt,residuePhi) in 
     let stmt' = psiStmt (stmtX) in
-    let con' = Con.make ~tycon:tycon 
+    let ctor' = Con.make ~tycon:tycon 
                         ~params:(List.combine params paramTys')
                         ~body:stmt' in
+    let ctors' = ctor'::otherCtors in
     let hdK' = Class.make
         ~tycon: tycon ~rhoAlloc: rhoAlloc' ~rhoBar: rhoBar'
         ~phi: phi' ~tyvars: (List.combine tyvars tyvarBounds')
         ~super: super' ~fields: (List.combine fields fieldTyps')
-        ~ctors: [] ~methods: [] in
-      (con',hdK')
+        ~ctors: ctors' ~methods: [] in
+      CT.add tycon hdK' ct'
 
   let elaborateCons ct' (k,hdK) = 
+    let tycon = Class.tycon hdK in
     let ctors = A.Class.ctors k in
-    let (ctors',hdK') = List.mapAndFold (elabCtor ct') 
-                          hdK ctors in
-
-      {hdK' with Class.ctors=ctors'}
+    let ct'' = List.fold_left elabCtor ct' ctors in
+      CT.find tycon ct''
+      
 
   let elabClass (ct':RegionAst.Class.t CT.t) (k:Ast.Class.t) =
     let hdB = elaborateHeader ct' k in
-    let consB = elaborateCons ct' (k,hdB) in
+    let _ =
+        begin
+          print_string "\nAfter header elaboration:\n";
+          Class.print hdB;
+        end in
+    (* Recursive occurances of tycon need
+     * extended class table (ct'') *)
+    let tycon = (Class.tycon hdB) in
+    let ct'' = CT.add tycon hdB ct' in
+    let consB = elaborateCons ct'' (k,hdB) in
       consB
 
   let elabClassTable (ct : Ast.Class.t CT.t) =

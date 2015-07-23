@@ -99,6 +99,7 @@ sig
   val tycon : t -> Tycon.t
   val params : t -> (Var.t * Type.t) list
   val body : t -> Stmt.t 
+  val print : t -> unit
 end
 
 module Con : module type of MakeCon(struct

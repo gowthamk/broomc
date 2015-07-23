@@ -52,26 +52,23 @@ let _ =
           CT.iter (fun tycon k -> 
             begin
               Class.print k;
-              Format.printf "@\n";
             end ) ct;
         end else () in
       let ct' = TypeCheck.doIt ct in
-      let _ = if false then
+      let _ = if true then
         begin
           print_string "Post FGJ Type checking:\n";
           CT.iter (fun tycon k -> 
             begin
               Class.print k;
-              Format.printf "@\n";
             end ) ct';
         end else () in
       let ct'' = RegionTypeInfer.doIt ct' in
         begin
-          print_string "Post Region Type Inference:\n";
+          print_string "\nPost Region Type Inference:\n";
           CT.iter (fun tycon k -> 
             begin
               RegionAst.Class.print k;
-              Format.printf "@\n";
             end ) ct'';
         end
     with

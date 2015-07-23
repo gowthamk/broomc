@@ -36,14 +36,15 @@ struct
   let rec toString phi =
     let f = RV.toString in 
     let g r1 rel r2 = (f r1)^rel^(f r2) in
+    let ret str = "("^str^")" in
       match phi with
         | True -> "T"
         | False -> "⊥"
         | Outlives (r1,r2) -> g r1 "≥" r2
         | Eq (r1,r2) -> g r1 "=" r2
         | NotEq (r1,r2) -> g r1 "≠" r2
-        | Conj phis -> printSV " ∧ " @@ List.map toString phis
-        | Disj phis -> printSV " ∨ " @@ List.map toString phis
+        | Conj phis -> ret @@ printSV " ∧ " @@ List.map toString phis
+        | Disj phis -> ret @@ printSV " ∨ " @@ List.map toString phis
 
   let truee = True
 
@@ -69,18 +70,20 @@ struct
                (fun prop props -> match prop with
                   | Conj props' -> List.append props' props
                   | _ -> prop::props) l [] in
-      if List.existsEq False l' then False
+      if List.existsEq False l' 
+      then failwith @@ toString @@ Conj l (*False *)
       else match List.filterNotEq True l' with 
             | [] -> True | l'' -> Conj l''
 
   let disj l = 
     let l' = List.fold_right 
                (fun prop props -> match prop with
+                  | False -> props
                   | Disj props' -> List.append props' props
                   | _ -> prop::props) l [] in
       if List.existsEq True l' then True
-      else match List.filterNotEq False l with 
-            | [] -> True | l'' -> Disj l''
+      else match l' with 
+            | [] -> True | [p] -> p | _ -> Disj l'
 
   let outlives (rhoLong,rhoShort) = Outlives (rhoLong,rhoShort)
 
@@ -260,7 +263,8 @@ struct
                         rBar: RegionVar.t list;
                         args: t list}
   and node =
-      Int of int
+    | Null
+    | Int of int
     | Bool of bool
     | Var of Var.t 
     | FieldGet of t * Field.t
@@ -271,7 +275,42 @@ struct
   let typ (T (_,t)) = t
   let node (T (n,_)) = n
   let make (n,ty) = T (n,ty)
-  let mapRegionVars f e = failwith "Unimpl."
+  let rec mapRegionVars f e = 
+    let doIt = mapRegionVars f in
+    let doItTy = Type.mapRegionVars f in
+    let ret n = make (n, typ e) in
+      match node e with
+        | Null | Int _ | Bool _ | Var _ -> e
+        | FieldGet (e,f) -> ret @@ FieldGet (doIt e,f)
+        | MethodCall x -> ret @@ MethodCall 
+                               {x with rAlloc = f x.rAlloc;
+                                       rBar = List.map f x.rBar;
+                                       args = List.map doIt x.args}
+        | New (t,args) -> ret @@ New (doItTy t, List.map doIt args)
+        | Pack (rho,e') -> 
+            let f' = fun rho' -> if RegionVar.equal (rho',rho)
+                                  then rho else f rho in
+              ret @@ Pack(rho, mapRegionVars f' e')
+
+  let rec toString (T (node,ty)) = 
+    "("^(nodeToString node)^":"^(Type.toString ty)^")"
+  and nodeToString = function
+    | Null -> "Null" | Int i -> string_of_int i
+    | Bool b -> string_of_bool b | Var v -> Var.toString v
+    | FieldGet (e,f) -> (toString e)^"." ^(Field.toString f) 
+    | MethodCall {meth = (objExp,mn); rAlloc; rBar; args} -> 
+        let methStr = (toString objExp)^"."^(MN.toString mn) in
+        let rargs = rAlloc :: rBar in
+        let rargsStr = printCSV @@ List.map RV.toString rargs in
+        let argsStr = printCSV @@ List.map toString args in
+          methStr^"<"^rargsStr^">"^"("^argsStr^")"
+    | New (ty,args) -> "new "^(Type.toString ty)^"("
+                           ^(printCSV @@ List.map toString args)^")"
+    | Pack (rho,e') -> 
+        let tyStr = Type.toString @@ Type.Exists (rho,typ e') in
+        let e'Str = toString e' in
+          "pack "^e'Str^" as "^tyStr
+
 end
 
 module Stmt =
@@ -314,7 +353,52 @@ struct
         | UnpackDec args -> UnpackDec {args with ty = doItTy args.ty;
                                   unpackExp = doItExp args.unpackExp}
 
-  let rec print stmt = failwith "Unimpl."
+  let rec print stmt = 
+    let estr = Expr.toString in
+    let tstr = Type.toString in
+    let vstr = Var.toString in
+      match stmt with
+        | VarDec (ty,v,e) -> printf "%s" @@ (tstr ty)^" "
+              ^(vstr v)^" = "^(estr e)^";"
+        | Assn (v,e) -> printf "%s" @@ (vstr v)^" = "
+                          ^(estr e)^";"
+        | FieldSet (e1,e2) -> printf "%s" @@ (estr e1)^" = "
+                              ^(estr e2)^";"
+        | Expr e -> printf "%s" @@ estr e
+        | Seq stmts -> 
+            begin
+              printf "@[<v 2>";
+              List.iter (fun stmt -> 
+                begin
+                  printf "@\n";
+                  print stmt;
+                end) stmts;
+              printf "@]";
+            end
+        | LetRegion (rho,stmt) ->
+            begin
+              printf "%s" @@ "letregion<"^(RV.toString rho)^"> {";
+              printf "@\n";
+              printf "@[<v 2>"; print stmt; printf "@]";
+              printf "}";
+            end
+        | Open (e,stmt) ->
+            begin
+              printf "open (%s) {" (estr e);
+              printf "@\n";
+              printf "@[<v 2>"; print stmt; printf "@]";
+              printf "}";
+            end
+        | OpenAlloc (e,stmt) ->
+            begin
+              printf "openalloc (%s) {" (estr e);
+              printf "@\n";
+              printf "@[<v 2>"; print stmt; printf "@]";
+              printf "}";
+            end
+        | UnpackDec {rho; ty; var; unpackExp = e;} -> printf "%s" @@
+              "let ("^(RV.toString rho)^","^(Type.toString ty)^" "
+            ^ (Var.toString var)^") = unpack "^(estr e)^";"
 end
 
 module Method =
@@ -417,21 +501,19 @@ struct
             printf "%s" @@ fdecToStr fdec;
           end) fdecs;
         (* ctors *)
-        (*
         List.iter (fun con ->
           begin
             printf "@\n";
             Con.print con;
           end) cons;
+        (*
         (* methods *)
         List.iter (fun m ->
           begin
             printf "@\n";
             Method.print m;
           end) meths;
-        printf "@]";
          *)
-        printf "@\n";
-        printf "}";
+        printf "@]"; printf "@\n}"; printf "@\n@?";
       end
 end
