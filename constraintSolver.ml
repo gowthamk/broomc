@@ -12,8 +12,10 @@ sig
           | Outlives of symbol_t * symbol_t 
           | Eq of symbol_t * symbol_t 
           | NotEq of symbol_t * symbol_t
+          | NotOutlives of symbol_t * symbol_t
           | Conj of t list
           | Disj of t list
+  val conj : t list -> t
 end
 module Make (S: sig
                   module Symbol : SYMBOL
@@ -39,7 +41,11 @@ struct
         | Disj props -> Disj (elimDupes props)
         | _ -> phi
 
-  let normalize phi = 
+  (*
+   * Given phi_cx and phi_cs, returns a 
+   *)
+  let normalize (phi_cx,phi_cs) = 
+    let phi = Phi.conj [phi_cx;phi_cs] in
     let phi' = elimCommonSubExp phi in
       {substFn = (fun x -> x);
        residue = phi'}

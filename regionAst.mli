@@ -35,7 +35,7 @@ sig
   type sol_t = {substFn: RegionVar.t -> RegionVar.t;
                 residue: RegionConstraint.t;}
 
-  val normalize : RegionConstraint.t -> sol_t
+  val normalize : RegionConstraint.t * RegionConstraint.t -> sol_t
   val abduce : (RegionConstraint.t * RegionConstraint.t) 
               -> RegionConstraint.t
 end
@@ -82,6 +82,8 @@ sig
     | FieldGet of t * Field.t
     | MethodCall of method_call_t
     | New of Type.t * t list
+    | UnOpApp of Prim.un_op * t
+    | BinOpApp of t * Prim.bin_op * t
     | Pack of RegionVar.t * t 
   val typ : t -> Type.t
   val make: node * Type.t -> t
@@ -109,7 +111,15 @@ end
 
 module Method :
 sig
-  type t
+  type t = {
+    name     : MethodName.t;
+    rhoAlloc : RegionVar.t;
+    rhoBar   : RegionVar.t list;
+    phi      : RegionConstraint.t;
+    params   : (Var.t * Type.t) list;
+    body     : Stmt.t;
+    ret_type : Type.t;
+  }
   val make : name:MethodName.t -> 
              rhoAlloc: RegionVar.t ->
              rhoBar: RegionVar.t list ->

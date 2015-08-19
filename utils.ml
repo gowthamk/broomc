@@ -57,4 +57,5 @@ struct
   let filterNotEq x l = List.filter (fun x' -> not (x' = x)) l
   let existsEq x l = List.exists (fun x' -> x' = x) l
   let mapAndFold = mapAndFold
+  let snoc l x = List.append l [x]
 end

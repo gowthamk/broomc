@@ -45,6 +45,10 @@ let _ =
     try
       let lexbuff = Lexing.from_channel channel in
       let classes = Parser.prog Lexer.token lexbuff in
+      (*
+       * Tycons in the same order they appear in the source text.
+       *)
+      let tycons = List.map Class.tycon classes in
       let ct = makeClassTable classes in
       let _ = if false then
         begin
@@ -55,7 +59,7 @@ let _ =
             end ) ct;
         end else () in
       let ct' = TypeCheck.doIt ct in
-      let _ = if true then
+      let _ = if false then
         begin
           print_string "Post FGJ Type checking:\n";
           CT.iter (fun tycon k -> 
@@ -63,7 +67,7 @@ let _ =
               Class.print k;
             end ) ct';
         end else () in
-      let ct'' = RegionTypeInfer.doIt ct' in
+      let ct'' = RegionTypeInfer.doIt tycons ct' in
         begin
           print_string "\nPost Region Type Inference:\n";
           CT.iter (fun tycon k -> 

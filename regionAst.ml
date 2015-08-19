@@ -30,6 +30,7 @@ struct
           | Outlives of RegionVar.t * RegionVar.t 
           | Eq of RegionVar.t * RegionVar.t 
           | NotEq of RegionVar.t * RegionVar.t
+          | NotOutlives of RegionVar.t * RegionVar.t
           | Conj of t list
           | Disj of t list
 
@@ -43,6 +44,7 @@ struct
         | Outlives (r1,r2) -> g r1 "≥" r2
         | Eq (r1,r2) -> g r1 "=" r2
         | NotEq (r1,r2) -> g r1 "≠" r2
+        | NotOutlives (r1,r2) -> "¬"^(g r1 "≥" r2)
         | Conj phis -> ret @@ printSV " ∧ " @@ List.map toString phis
         | Disj phis -> ret @@ printSV " ∨ " @@ List.map toString phis
 
@@ -106,6 +108,7 @@ struct
     | Outlives (r1,r2) -> Outlives (f r1,f r2)
     | Eq (r1,r2) -> equal (f r1,f r2)
     | NotEq (r1,r2) -> notEqual (f r1,f r2)
+    | NotOutlives (r1,r2) -> notEqual (f r1,f r2)
     | Conj props -> conj @@ List.map (mapRegionVars f) props
     | Disj props -> disj @@ List.map (mapRegionVars f) props
     | prop -> prop
@@ -270,6 +273,8 @@ struct
     | FieldGet of t * Field.t
     | MethodCall of method_call_t
     | New of Type.t * t list
+    | UnOpApp of Prim.un_op * t
+    | BinOpApp of t * Prim.bin_op * t
     | Pack of RegionVar.t * t
   and t = T of node * Type.t
   let typ (T (_,t)) = t
@@ -287,6 +292,8 @@ struct
                                        rBar = List.map f x.rBar;
                                        args = List.map doIt x.args}
         | New (t,args) -> ret @@ New (doItTy t, List.map doIt args)
+        | UnOpApp (unop,e) -> ret @@ UnOpApp (unop, doIt e)
+        | BinOpApp (e1,binop,e2) -> ret @@ BinOpApp (doIt e1,binop,doIt e2)
         | Pack (rho,e') -> 
             let f' = fun rho' -> if RegionVar.equal (rho',rho)
                                   then rho else f rho in
@@ -306,6 +313,9 @@ struct
           methStr^"<"^rargsStr^">"^"("^argsStr^")"
     | New (ty,args) -> "new "^(Type.toString ty)^"("
                            ^(printCSV @@ List.map toString args)^")"
+    | UnOpApp (op,e) -> (Prim.unOpToString op)^(toString e)
+    | BinOpApp (e1,op,e2) -> (toString e1)^" " ^(Prim.binOpToString op)
+                              ^" "^(toString e2)
     | Pack (rho,e') -> 
         let tyStr = Type.toString @@ Type.Exists (rho,typ e') in
         let e'Str = toString e' in
@@ -430,6 +440,29 @@ struct
   let params m = m.params
   let body m = m.body
   let ret_type m = m.ret_type
+
+  let print m = 
+    let retTyStr = Type.toString @@ ret_type m in
+    let mnStr = MN.toString @@ name m in
+    let rhoAlloc = rhoAlloc m in
+    let rhoBar = rhoBar m in
+    let rhoStr = printCSV @@ List.map RV.toString @@ 
+                   rhoAlloc::rhoBar in
+    let phiStr = RegionConstraint.toString @@ phi m in
+    let mSig = "<"^rhoStr^"|"^phiStr^">"^mnStr in
+    let params = params m in
+    let paramStr = printCSV @@ List.map 
+       (fun (v,ty) -> (Type.toString ty)^" "^(Var.toString v)) params in
+    let body = body m in
+      begin
+        printf "%s" @@ retTyStr^" "^mSig^"("^paramStr^") {";
+        printf "@\n";
+        printf "@[<v 2>";
+        Stmt.print body;
+        printf "@]";
+        printf "@\n";
+        printf "}"
+      end
 end
 
 module Con = MakeCon(struct
@@ -506,14 +539,12 @@ struct
             printf "@\n";
             Con.print con;
           end) cons;
-        (*
         (* methods *)
         List.iter (fun m ->
           begin
             printf "@\n";
             Method.print m;
           end) meths;
-         *)
         printf "@]"; printf "@\n}"; printf "@\n@?";
       end
 end

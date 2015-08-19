@@ -56,6 +56,7 @@ sig
   val node : t -> node
   val typ : t -> Type.t
   val make : node * Type.t -> t
+  val toString : t -> string
 end
 
 module Stmt : 
