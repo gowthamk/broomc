@@ -16,12 +16,15 @@ let mkUidGen idBase =
       let id = idBase ^ (string_of_int !count) in
       let _ = count := !count + 1 in
         id
+let mkSubstFn2 substs = 
+  fun a -> 
+    try List.assoc a substs with
+      | Not_found -> failwith @@ "Incomplete Substitution"
+      
 let mkSubstFn dom codom = 
   let substs = List.combine dom codom in
-    fun a -> 
-      try List.assoc a substs with
-        | Not_found -> failwith @@ "Incomplete Substitution"
-       
+    mkSubstFn2 substs
+
 let andOf = List.fold_left (&&) true 
 
 let rec tabulate n f l = if n<0 then l else
@@ -33,6 +36,12 @@ let rec mapAndFold f b alist = match alist with
       let (x',b') = f x b in
       let (xs',b'') = mapAndFold f b' xs in
         (x'::xs',b'')
+
+let rec mapSome f = function
+  | [] -> []
+  | x::xs -> (match f x with 
+                | None -> mapSome f xs
+                | Some x' -> x'::(mapSome f xs))
 
 let erongi f = (fun _ -> f ())
 
@@ -58,4 +67,5 @@ struct
   let existsEq x l = List.exists (fun x' -> x' = x) l
   let mapAndFold = mapAndFold
   let snoc l x = List.append l [x]
+  let mapSome = mapSome
 end

@@ -357,9 +357,6 @@ struct
             let ty' = templateTy ty in 
             let c3 = type_ok ty' in
               (make (BinOpApp (e1',op,e2'),ty'), Phi.conj [c1;c2;c3])
-        | _ -> 
-            let _ = print_string @@ A.Expr.toString exp in
-              failwith "Expr Unimpl."
 
   let rec elabStmt ct' ctxt stmt = 
     let open Stmt in
@@ -478,7 +475,7 @@ struct
     let phi_cx = Phi.conj @@ List.map (* outlives guarantees *)
                   (fun rho -> Phi.outlives (rho,rhoAlloc)) rhoBar in
     let phi_cs = Phi.conj [c1; c2; c3] in
-    let {CS.substFn; residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
+    let {CS.fnM; residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
     let phi_sol = CS.abduce (phi_cx,residuePhi) in 
     let phi_cx' = Phi.conj [phi_cx;phi_sol] in
     (*
@@ -543,7 +540,9 @@ struct
      * Note: Free RVs in paramTysX were not concretized. So, substFn 
      * should contain their assignments.
      *)
-    let {CS.substFn;residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
+    let {CS.fnM;residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
+    let substFn = fun rv -> if RV.isConcrete rv 
+                            then rv else fnM rv in
     let phi_sol = CS.abduce (phi_cx,residuePhi) in 
     let psiI = Type.mapRegionVars substFn in
     let psiStmt = Stmt.mapRegionVars substFn in
@@ -616,7 +615,9 @@ struct
     let c3 = subtypeOk ct'' (liveRhos,tyVE) (stmtTyX,retTyX) in
     let phi_cx = ctxt'.phi_cx in
     let phi_cs = Phi.conj [c1;c2;c3] in
-    let {CS.substFn;residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
+    let {CS.fnM;residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
+    let substFn = fun rv -> if RV.isConcrete rv 
+                            then rv else fnM rv in
     let phi_sol = CS.abduce (phi_cx,residuePhi) in 
     let psiStmt = Stmt.mapRegionVars substFn in
     let stmt' = psiStmt (stmtX) in

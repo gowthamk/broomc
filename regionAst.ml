@@ -15,7 +15,8 @@ struct
   let freshR () = T (ref R, freshId ())
   let dummy = T (ref Dummy,freshId ())
   let concretize = function
-    | T ({contents=Dummy},_) -> ()
+    | T ({contents=Dummy},_) -> 
+        failwith "Dummy RV cannot be concretized"
     | T (x,id) -> (x := R)
   let equal (T (typ1,id1), T (typ2,id2)) = 
     (typ1.contents = typ2.contents) && (id1 = id2)
@@ -25,6 +26,9 @@ struct
     | Rho -> "ρ"^s 
     | R -> "R"^s 
     | Dummy -> "--dummy--"
+  let isConcrete (T (typref,s)) = match !typref with
+    | R -> true | Rho -> false 
+    | _ -> failwith "isConcrete called on a Dummy RV"
 end
 
 module RV = RegionVar
@@ -137,6 +141,7 @@ struct
                                        struct
                                          type symbol_t = RegionVar.t
                                          include RegionConstraint
+                                         let mapSymbols = mapRegionVars
                                        end
                                      end)
   include CS

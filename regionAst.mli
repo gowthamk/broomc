@@ -11,6 +11,7 @@ sig
   val concretize : t -> unit
   val equal : t * t -> bool
   val isDummy : t -> bool
+  val isConcrete : t -> bool
 end
 
 module RegionVarSet : Set.S with type elt = RegionVar.t
@@ -34,7 +35,7 @@ end
 
 module ConstraintSolve :
 sig
-  type sol_t = {substFn: RegionVar.t -> RegionVar.t;
+  type sol_t = {fnM: RegionVar.t -> RegionVar.t;
                 residue: RegionConstraint.t;}
 
   val normalize : RegionConstraint.t * RegionConstraint.t -> sol_t
