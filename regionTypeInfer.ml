@@ -13,7 +13,7 @@ struct
   module ATy = A.Type
   module RA = RegionAst
   module L = List
-  module Rho = RegionVar
+  module RV = RegionVar
   module R = RegionVar
   module RVSet = RegionVarSet
   module Phi = RegionConstraint
@@ -29,15 +29,15 @@ struct
   let (++) s1 s2 = RVSet.union s1 s2
   let (--) s1 s2 = RVSet.diff s1 s2
 
-  type arrow_t = {rhoAlloc : Rho.t; 
-                  rhoBar : Rho.t list; 
+  type arrow_t = {rhoAlloc : RV.t; 
+                  rhoBar : RV.t list; 
                   phi : Phi.t;
                   argTys : Type.t list; 
                   retTy: Type.t}
 
   let object_class_tycon = Tycon.make @@ Id.fromString "Object"
   let object_class = Class.make 
-    ~tycon: object_class_tycon ~rhoAlloc: (Rho.fresh()) 
+    ~tycon: object_class_tycon ~rhoAlloc: (RV.freshR()) 
     ~rhoBar: [] ~phi: Phi.truee ~tyvars: [] ~super: Type.Unknown 
     ~fields: [] ~ctors: [] ~methods: []
 
@@ -75,16 +75,16 @@ struct
     | ATy.Int -> Int | ATy.Bool -> Bool
     | ATy.Unit -> Unit | ATy.Unknown -> Unknown
     | ATy.Any -> Any | ATy.Tyvar v -> Tyvar v
-    | ATy.Object -> Object (Rho.fresh())
+    | ATy.Object -> Object (RV.freshRho())
     | ATy.ConApp (tycon,tyargs) -> 
         if A.Tycon.isRegion tycon then 
           let rootTy = match tyargs with [x] -> x
             | _ -> failwith "Invalid region class type" in
           let rootTyX = templateTy ct' rootTy in
-          let thisRgnRho = Rho.fresh () in
+          let thisRgnRho = RV.freshRho () in
           let substFn = fun rho -> thisRgnRho in
           let rootTy' = Type.mapRegionVars substFn rootTyX in
-          let rhoAlloc = Rho.fresh () in
+          let rhoAlloc = RV.freshRho () in
           let thisRgnTy = Type.Region {rho=thisRgnRho;
                                    rhoAlloc=rhoAlloc;
                                    rootObjTy = rootTy';} in
@@ -95,13 +95,13 @@ struct
             let nRgnParams = List.length (Class.rhoBar k) + 1 
               (* the +1 is for rhoAlloc *) in
             let rargs = List.tabulate nRgnParams @@ 
-                          fun _ -> Rho.fresh() in
+                          fun _ -> RV.freshRho() in
             let tyargs' = List.map (templateTy ct') tyargs in
               ConApp {tycon=tycon; rAlloc = List.hd rargs;
                       rBar = List.tl rargs; tyArgs = tyargs';}
           with | Not_found -> 
             let tyargs' = List.map (templateTy ct') tyargs in
-              ConApp {tycon=tycon; rAlloc = Rho.dummy;
+              ConApp {tycon=tycon; rAlloc = RV.dummy;
                       rBar = []; tyArgs = tyargs';}
 
   let allocRgn = let open Type in function
@@ -248,7 +248,7 @@ struct
                       phi_cx: Phi.t;
                       tyVE : Type.t TyVE.t;
                       ve : Type.t VE.t;
-                      rhoAlloc : Rho.t}
+                      rhoAlloc : RV.t}
 
   let elabPackExpr ct' ctxt exp (subTy,supTy) = 
     let open Type in
@@ -256,7 +256,7 @@ struct
       match (subTy,supTy) with
         | (Region {rho}, Exists (boundRho,t)) -> 
             let substFn = fun rho' -> 
-              if Rho.equal (rho',boundRho) then rho else rho' in
+              if RV.equal (rho',boundRho) then rho else rho' in
             let t' = Type.mapRegionVars substFn t in
             let c = subtype_ok (subTy,t') in
             let exp' = Expr.make (Expr.Pack (rho,exp),supTy) in
@@ -292,7 +292,7 @@ struct
             let classTyp = Expr.typ objExp' in
             let {rhoAlloc; rhoBar; phi; argTys=formalArgTys; 
                  retTy=formalRetTy} = mtype ct' (classTyp,mn) in
-            let rBar = List.map (erongi Rho.fresh) rhoBar in
+            let rBar = List.map (erongi RV.freshRho) rhoBar in
             let c3 = Phi.subEq (RVSet.of_list rBar, liveRhos) in
             (* rAlloc is the current inAllocCtxt passed via ctxt *)
             let psiRho = mkSubstFn (rhoAlloc::rhoBar) 
@@ -434,6 +434,8 @@ struct
                       frv superX;
                       List.concat @@ List.map frv fieldTypsX] in
     let rhoBar = List.filterNotEq rhoAlloc freeRhos in
+    (* rhoAlloc and rhoBar are concrete *)
+    let _ = List.iter RV.concretize (rhoAlloc::rhoBar) in
     let newTy = Type.ConApp {Type.tycon = tycon; rAlloc = rhoAlloc;
                              rBar = rhoBar; 
                              tyArgs = List.map Type.var tyvars} in
@@ -537,12 +539,18 @@ struct
                      rhoAlloc = rhoAlloc;} (A.Con.body ctor) in
     let phi_cx = ctxt'.phi_cx in
     let phi_cs = Phi.conj [c1;c2] in
+    (*
+     * Note: Free RVs in paramTysX were not concretized. So, substFn 
+     * should contain their assignments.
+     *)
     let {CS.substFn;residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
     let phi_sol = CS.abduce (phi_cx,residuePhi) in 
+    let psiI = Type.mapRegionVars substFn in
     let psiStmt = Stmt.mapRegionVars substFn in
+    let paramTys' = List.map psiI paramTysX in
     let stmt' = psiStmt (stmtX) in
     let ctor' = Con.make ~tycon:tycon 
-                        ~params:(List.combine params paramTysX)
+                        ~params:(List.combine params paramTys')
                         ~body:stmt' in
     let ctors' = ctor'::otherCtors in
     let phi_cx' = Phi.conj [phi_cx;phi_sol] in
@@ -570,17 +578,19 @@ struct
     let (params,paramTys) = List.split @@ A.Method.params meth in
     let paramTysX = List.map (templateTy ct') paramTys in
     let retTyX = templateTy ct' @@ A.Method.ret_type meth in
-    let rhoAllocM = Rho.fresh () in
+    let rhoAllocM = RV.freshRho () in
     let frv = Type.frv in
     let freeRhos = List.concat @@ 
                       List.snoc (List.map frv paramTysX) 
                                 (frv retTyX) in
     let rhoBarM = List.filterNotEq rhoAllocM freeRhos in
+    (* rhoAllocM and rhoBarM need to be concretized *)
+    let _ = List.iter RV.concretize (rhoAllocM::rhoBarM) in
     let allRhos = RVSet.of_list @@ 
                     List.concat [rhoAlloc::rhoBar;
                                  rhoAllocM::rhoBarM] in
     let liveRhos = allRhos in
-    let phiM = Phi.truee in (* Assump: meth is non-recursive *)
+    let phiM = Phi.truee in (* !! Assump: meth is non-recursive !! *)
     (* Recursive occurances of "new" need
      * extended class table (ct'') *)
     let methX = Method.make ~name: (A.Method.name meth)

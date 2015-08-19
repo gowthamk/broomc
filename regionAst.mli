@@ -6,7 +6,9 @@ sig
   type t
   val dummy : t
   val toString : t -> string
-  val fresh : unit -> t
+  val freshRho : unit -> t
+  val freshR : unit -> t
+  val concretize : t -> unit
   val equal : t * t -> bool
   val isDummy : t -> bool
 end

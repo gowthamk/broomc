@@ -7,13 +7,24 @@ module MN = MethodName
 
 module RegionVar =
 struct
-  type t = string
+  type typ = Rho | R | Dummy
+  type t = T of typ ref * string 
 
-  let fresh = mkUidGen "R"
-  let dummy = mkUidGen "--dummy--" ()
-  let equal (t1,t2) = t1 = t2
-  let isDummy t = equal (t,dummy)
-  let toString t = t
+  let freshId = mkUidGen ""
+  let freshRho () = T (ref Rho, freshId ())
+  let freshR () = T (ref R, freshId ())
+  let dummy = T (ref Dummy,freshId ())
+  let concretize = function
+    | T ({contents=Dummy},_) -> ()
+    | T (x,id) -> (x := R)
+  let equal (T (typ1,id1), T (typ2,id2)) = 
+    (typ1.contents = typ2.contents) && (id1 = id2)
+  let isDummy (T (typref,_)) = match !typref with
+    | Dummy -> true | _ -> false
+  let toString (T (typref,s)) = match !typref with
+    | Rho -> "ρ"^s 
+    | R -> "R"^s 
+    | Dummy -> "--dummy--"
 end
 
 module RV = RegionVar
