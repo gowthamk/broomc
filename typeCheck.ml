@@ -189,8 +189,9 @@ struct
     let (ety1,ety2) = (Expr.typ e1,Expr.typ e2) in
     let ((ty1,ty2),ty) = Prim.typOfBinOp op in
     let opStr = Prim.binOpToString op in
+    let is_subtype = isSubtype (CT.empty) (TyVE.empty)  in
       begin
-        assrt(Type.equal (ety1,ty1) && Type.equal (ety2,ty2),
+        assrt(is_subtype (ety1,ty1) && is_subtype (ety2,ty2),
               opStr^" argument type mismatch");
         ty
       end
@@ -289,6 +290,17 @@ struct
                       (List.append stmts' [stmt'],ve')) 
                  ([],ve) stmts in
               (Seq stmts',ve')
+        | ITE (grd,tstmt,fstmt) ->
+            let grd' = doItExp grd in
+            let _ = subtypeOk ct tyVE (Expr.typ grd',Type.Bool) in
+            let (tstmt',_) = doIt tstmt in
+            let (fstmt',_) = doIt fstmt in
+              ret @@ ITE (grd',tstmt',fstmt')
+        | While(grd,stmt) ->
+            let grd' = doItExp grd in
+            let _ = subtypeOk ct tyVE (Expr.typ grd',Type.Bool) in
+            let (stmt',_) = doIt stmt in
+              ret @@ While (grd',stmt')
         | LetRegion s -> 
             let (s',ve') = doIt s in
               (LetRegion s',ve')

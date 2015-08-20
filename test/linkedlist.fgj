@@ -25,16 +25,14 @@ class LinkedList<'a extends Object>  extends Object  {
     'a head() {
         return this.head.val;
     }
-/*
 
     LinkedList<'a>   reverse(void u) {
         let LinkedList<'a> xs = new LinkedList<'a>  (this.head.val);
         let LinkedListNode<'a> cur = this.head.next;
-        while(not (cur== Null)) {
+        while(!(cur== Null)) {
             xs.add(cur.val);
             cur = cur.next;
         }
         return xs;
     }
-*/
 }

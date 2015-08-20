@@ -66,9 +66,9 @@ struct
         assrt (List.length rhos = List.length rargs,
                invalidConAppMsg);
       end in
-    let rhoSubstFn = mkSubstFn rhos rargs in
+    let rhoSubstFn = mkFn rhos rargs in
     let tyvars = List.map fst (Class.tyvars k) in
-    let tyvarSubstFn = mkSubstFn tyvars tyargs in
+    let tyvarSubstFn = mkPartialFn tyvars tyargs in
       (rhoSubstFn, tyvarSubstFn)
 
   let rec templateTy ct' = let open Type in function
@@ -163,7 +163,7 @@ struct
                   ^(Tycon.toString args.tycon)^" not found" in
             let (rhoA,rhoBar) = (Class.rhoAlloc k,Class.rhoBar k) in
             let (rA,rBar) = (args.rAlloc,args.rBar) in
-            let rhoSubstFn = mkSubstFn (rhoA::rhoBar) (rA::rBar) in
+            let rhoSubstFn = mkFn (rhoA::rhoBar) (rA::rBar) in
             let phi = Class.phi k in
             let c4 = Phi.mapRegionVars rhoSubstFn phi in
             (* c5 below is not needed as we are explcitly recording all
@@ -302,7 +302,7 @@ struct
             let rBar = List.map (erongi RV.freshRho) rhoBar in
             let c3 = Phi.subEq (RVSet.of_list rBar, liveRhos) in
             (* rAlloc is the current inAllocCtxt passed via ctxt *)
-            let psiRho = mkSubstFn (rhoAlloc::rhoBar) 
+            let psiRho = mkFn (rhoAlloc::rhoBar) 
                                    (rAlloc::rBar) in
             let c4 = Phi.mapRegionVars psiRho phi in
             let psiRhoInTy = Type.mapRegionVars psiRho in
@@ -415,10 +415,26 @@ struct
             (* clist has constraints in reverse order *)
             let c = Phi.conj @@ List.rev clist in
               (stmt',ctxt',c)
+        | A.Stmt.ITE (grd,tstmt,fstmt) ->
+            let (grd',c1) = elabExpr ct' ctxt grd in
+            (* Note: a region may have been transferred in either of
+             * the branches. We should keep track if we are making a
+             * best effort *)
+            let (tstmt',_,c2) = elabStmt ct' ctxt tstmt in
+            let (fstmt',_,c3) = elabStmt ct' ctxt fstmt in
+              (ITE (grd',tstmt',fstmt'), ctxt, Phi.conj [c1;c2;c3])
+        | A.Stmt.While (grd,stmt) ->
+            let (grd',c1) = elabExpr ct' ctxt grd in
+            (* Note: a region may have been transferred in either of
+             * the branches. We should keep track if we are making a
+             * best effort *)
+            let (stmt',_,c2) = elabStmt ct' ctxt stmt in
+              (While(grd',stmt'), ctxt, Phi.conj [c1;c2])
         | _ -> failwith "Stmt Unimpl."
 
-  let typeOfStmt = function
+  let rec typeOfStmt = function
     | Stmt.Expr e -> Expr.typ e
+    | Stmt.Seq stmts -> typeOfStmt @@ List.last stmts
     | _ -> Type.Unit
 
   let headerTemplate ct' k = 
@@ -620,6 +636,13 @@ struct
      *)
     let stmtTyX = typeOfStmt stmtX in 
     let c3 = subtypeOk ct'' (liveRhos,tyVE) (stmtTyX,retTyX) in
+    let _ = 
+      begin
+        Printf.printf "**** (%s <: %s): ***\n" 
+          (Type.toString stmtTyX) (Type.toString retTyX); 
+        print_string @@ Phi.toString c3;
+        print_string "\n";
+      end in
     let phi_cx = ctxt'.phi_cx in
     let phi_cs = Phi.conj [c1;c2;c3] in
     let {CS.fnM;residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in

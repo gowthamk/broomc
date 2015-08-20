@@ -51,6 +51,9 @@
 %token T_keyword_extends
 %token T_keyword_new
 %token T_keyword_super
+%token T_keyword_if
+%token T_keyword_else
+%token T_keyword_while
 %token T_keyword_return
 %token T_keyword_let
 %token T_keyword_letregion
@@ -237,6 +240,7 @@ args:
 
 expr:
   | exprnode {Expr.make ($1,Type.Unknown)}
+  /*(*| T_lparen exprnode T_rparen{Expr.make ($2,Type.Unknown)}*)*/
 
 exprnode:
   | T_keyword_null {Ast.Expr.Null}
@@ -252,7 +256,7 @@ exprnode:
     { match $2 with 
       | Ast.Type.ConApp (tycon,targs) -> Expr.New(tycon,targs,$4) 
       | _ -> raise ParseError}
-  | unary_op expr {Expr.UnOpApp ($1,$2)}
+  | unary_op T_lparen expr T_rparen {Expr.UnOpApp ($1,$3)}
   | expr binary_op expr {Expr.BinOpApp ($1,$2,$3)}
   | T_lparen exprnode T_rparen {$2}
 
@@ -268,13 +272,26 @@ atomstmt:
       {Ast.Stmt.VarDec ($1,$2,$4)}
   | T_keyword_let typ var T_assign expr T_semicolon 
       {Ast.Stmt.VarDec ($2,$3,$5)}
-  | var expr T_semicolon 
-      {Ast.Stmt.Assn ($1,$2)}
+  | var T_assign expr T_semicolon 
+      {Ast.Stmt.Assn ($1,$3)}
   | expr T_period field T_assign expr T_semicolon 
       {let lhsExp = Expr.make (Expr.FieldGet ($1,$3), Type.Unknown) in
         Ast.Stmt.FieldSet (lhsExp,$5)}
   | expr T_semicolon 
       {Ast.Stmt.Expr $1}
+  | T_keyword_if T_lparen expr T_rparen T_lbrace stmt T_rbrace
+      {let grd = $3 in
+       let tstmt = $6 in
+       let fstmt = Ast.Stmt.Seq [] in 
+         Ast.Stmt.ITE (grd,tstmt,fstmt)}
+  | T_keyword_if T_lparen expr T_rparen T_lbrace stmt T_rbrace
+                         T_keyword_else T_lbrace stmt T_rbrace
+      {let grd = $3 in
+       let tstmt = $6 in
+       let fstmt = $10 in 
+         Ast.Stmt.ITE (grd,tstmt,fstmt)}
+  | T_keyword_while T_lparen expr T_rparen T_lbrace stmt T_rbrace 
+      {Ast.Stmt.While ($3,$6)}
   | T_keyword_return expr T_semicolon
       {Ast.Stmt.Expr $2}
   | T_keyword_letregion T_lbrace stmt T_rbrace

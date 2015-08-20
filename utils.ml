@@ -16,14 +16,23 @@ let mkUidGen idBase =
       let id = idBase ^ (string_of_int !count) in
       let _ = count := !count + 1 in
         id
-let mkSubstFn2 substs = 
+let mkFn2 substs = 
+  fun a -> 
+    try List.assoc a substs with
+      | Not_found -> a 
+      
+let mkFn dom codom = 
+  let substs = List.combine dom codom in
+    mkFn2 substs
+
+let mkPartialFn2 substs = 
   fun a -> 
     try List.assoc a substs with
       | Not_found -> failwith @@ "Incomplete Substitution"
       
-let mkSubstFn dom codom = 
-  let substs = List.combine dom codom in
-    mkSubstFn2 substs
+let mkPartialFn dom codom = 
+  let map = List.combine dom codom in
+    mkPartialFn2 map
 
 let andOf = List.fold_left (&&) true 
 
@@ -68,4 +77,8 @@ struct
   let mapAndFold = mapAndFold
   let snoc l x = List.append l [x]
   let mapSome = mapSome
+  let rec last = function
+    | [] -> failwith "No last element in an empty list"
+    | [x] -> x
+    | x::xs -> last xs
 end

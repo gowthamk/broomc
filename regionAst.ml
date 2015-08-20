@@ -100,7 +100,7 @@ struct
                   | _ -> prop::props) l [] in
       if List.existsEq True l' then True
       else match l' with 
-            | [] -> True | [p] -> p | _ -> Disj l'
+            | [] -> False | [p] -> p | _ -> Disj l'
 
   let outlives (rhoLong,rhoShort) = Outlives (rhoLong,rhoShort)
 
@@ -305,7 +305,9 @@ struct
         | Null | Int _ | Bool _ | Var _ -> ret (node e)
         | FieldGet (e,f) -> ret @@ FieldGet (doIt e,f)
         | MethodCall x -> ret @@ MethodCall 
-                               {x with rAlloc = f x.rAlloc;
+                               {x with meth = (doIt @@ fst x.meth,
+                                               snd x.meth);
+                                       rAlloc = f x.rAlloc;
                                        rBar = List.map f x.rBar;
                                        args = List.map doIt x.args}
         | New (t,args) -> ret @@ New (doItTy t, List.map doIt args)
@@ -352,6 +354,8 @@ struct
     | FieldSet of Expr.t * Expr.t
     | Expr of Expr.t
     | Seq of t list
+    | ITE of Expr.t * t * t
+    | While of Expr.t * t
     | LetRegion of RegionVar.t * t
     | Open of Expr.t * t
     | OpenAlloc of Expr.t * t
@@ -371,6 +375,9 @@ struct
            * which should not be substituted in subsequent stmts. 
            * We are ignoring this for now *)
         | Seq ts -> Seq (List.map doIt ts)
+        | ITE (grd,tstmt,fstmt) -> ITE (doItExp grd, doIt tstmt, 
+                                        doIt fstmt)
+        | While (grd,stmt) -> While (doItExp grd, doIt stmt)
         | LetRegion (rho,stmt) -> 
             mapRegionVars (fun rho' -> 
                              if RegionVar.equal (rho,rho') 
@@ -402,6 +409,24 @@ struct
                 end) stmts;
               printf "@]";
             end
+        | ITE (grd,tstmt,fstmt) ->
+            begin
+              printf "if (%s) {" (estr grd);
+              printf "@\n";
+              printf "@[<v 2>"; print tstmt; printf "@]";
+              printf "}";
+              printf "else {";
+              printf "@\n";
+              printf "@[<v 2>"; print fstmt; printf "@]";
+              printf "}"
+            end
+        | While (grd,stmt) -> 
+            begin
+              printf "while (%s) {" (estr grd);
+              printf "@\n";
+              printf "@[<v 2>"; print stmt; printf "@]";
+              printf "}";
+            end 
         | LetRegion (rho,stmt) ->
             begin
               printf "%s" @@ "letregion<"^(RV.toString rho)^"> {";

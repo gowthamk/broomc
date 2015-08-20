@@ -72,12 +72,12 @@ struct
       | Phi.Conj cs -> cs
       | Phi.Disj _ -> failwith "Unimpl." | _ -> [phi'] in
     let (m,cs') = simpleSolve [] cs in
-    let fnM = mkSubstFn2 m in
+    let fnM = mkPartialFn2 m in
     let psiCs = Phi.mapSymbols 
                   (fun s -> if Symbol.isConcrete s then s
                             else fnM s) in 
     (*
-     * Unlike partialFnM, fnM should be a complete function 
+     * Although fnM is a partial fn, but it shoudl be complete
      * over the domain of non-concrete symbols. It is an error
      * if it is not so. The following will see to that.
      *)

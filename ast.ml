@@ -138,6 +138,8 @@ struct
     | FieldSet of Expr.t * Expr.t
     | Expr of Expr.t
     | Seq of t list
+    | ITE of Expr.t * t * t
+    | While of Expr.t * t
     | LetRegion of t
     | Open of Expr.t * t
     | OpenAlloc of Expr.t * t
@@ -168,6 +170,24 @@ struct
                 end) stmts;
               printf "@]";
             end
+        | ITE (grd,tstmt,fstmt) ->
+            begin
+              printf "if (%s) {" (estr grd);
+              printf "@\n";
+              printf "@[<v 2>"; print tstmt; printf "@]";
+              printf "}";
+              printf "else {";
+              printf "@\n";
+              printf "@[<v 2>"; print fstmt; printf "@]";
+              printf "}"
+            end
+        | While (grd,stmt) -> 
+            begin
+              printf "while (%s) {" (estr grd);
+              printf "@\n";
+              printf "@[<v 2>"; print stmt; printf "@]";
+              printf "}";
+            end 
         | LetRegion stmt ->
             begin
               printf "letregion {";

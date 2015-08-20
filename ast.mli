@@ -67,6 +67,8 @@ sig
     | FieldSet of Expr.t * Expr.t
     | Expr of Expr.t
     | Seq of t list
+    | ITE of Expr.t * t * t
+    | While of Expr.t * t
     | LetRegion of t
     | Open of Expr.t * t
     | OpenAlloc of Expr.t * t
