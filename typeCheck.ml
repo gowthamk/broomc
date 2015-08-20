@@ -68,14 +68,14 @@ struct
 
   let rec isSubtype ct tyVE (subTyp,supTyp) = 
     Type.equal (subTyp,supTyp) ||
-    match subTyp with 
-      | Type.Any -> true
+    match (subTyp,supTyp) with 
+      | (Type.Any,_) -> true | (_,Type.Any) -> true
         (* A tyvar cannot be subtype of another tyvar.
          * If 'a <: A and 'b <: B and B <: A, then we cannot derive 
          * 'b <: 'a. *)
-      | Type.Tyvar v -> isSubtype ct tyVE (TyVE.find v tyVE, supTyp)
-      | Type.Object -> false
-      | Type.ConApp _ -> 
+      | (Type.Tyvar v,_) -> isSubtype ct tyVE (TyVE.find v tyVE, supTyp)
+      | (Type.Object,_) -> false
+      | (Type.ConApp _,_) -> 
           let superOfSubTyp = superOfClassTy ct subTyp in
             isSubtype ct tyVE (superOfSubTyp,supTyp)
       | _ -> false

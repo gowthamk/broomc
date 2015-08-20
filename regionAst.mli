@@ -38,6 +38,7 @@ sig
   type sol_t = {fnM: RegionVar.t -> RegionVar.t;
                 residue: RegionConstraint.t;}
 
+  val elimCommonSubExp : RegionConstraint.t -> RegionConstraint.t 
   val normalize : RegionConstraint.t * RegionConstraint.t -> sol_t
   val abduce : (RegionConstraint.t * RegionConstraint.t) 
               -> RegionConstraint.t

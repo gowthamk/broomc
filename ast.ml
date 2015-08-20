@@ -80,9 +80,10 @@ struct
     let boolt = ((Type.Bool,Type.Bool),Type.Bool) in
     let intt = ((Type.Int,Type.Int),Type.Int) in
     let intBoolt = ((Type.Int,Type.Int),Type.Bool) in
+    let anyBoolt = ((Type.Any,Type.Any),Type.Bool) in
       match op with 
         | Plus | Minus | Mult | Div -> intt
-        | GT | LT | Equal -> intBoolt
+        | GT | LT -> intBoolt | Equal -> anyBoolt
         | And | Or -> boolt
 end
 

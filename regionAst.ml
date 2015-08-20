@@ -296,12 +296,13 @@ struct
   let typ (T (_,t)) = t
   let node (T (n,_)) = n
   let make (n,ty) = T (n,ty)
+
   let rec mapRegionVars f e = 
     let doIt = mapRegionVars f in
     let doItTy = Type.mapRegionVars f in
-    let ret n = make (n, typ e) in
+    let ret n = make (n, Type.mapRegionVars f (typ e)) in
       match node e with
-        | Null | Int _ | Bool _ | Var _ -> e
+        | Null | Int _ | Bool _ | Var _ -> ret (node e)
         | FieldGet (e,f) -> ret @@ FieldGet (doIt e,f)
         | MethodCall x -> ret @@ MethodCall 
                                {x with rAlloc = f x.rAlloc;

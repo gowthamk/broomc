@@ -81,8 +81,9 @@ struct
      * over the domain of non-concrete symbols. It is an error
      * if it is not so. The following will see to that.
      *)
-    let phi_res = Phi.conj @@ List.map psiCs cs' in 
+    let phi_res = Phi.conj 
+                      @@ List.map psiCs cs' in 
       {fnM = fnM;
        residue = phi_res}
-  let abduce (ctxt,phi) = phi
+  let abduce (ctxt,phi) = elimCommonSubExp phi
 end

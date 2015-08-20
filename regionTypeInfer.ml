@@ -111,9 +111,41 @@ struct
     | t -> failwith @@ "Allocation region of "
                     ^(Type.toString t)^" unknown"
 
-  let rec typeOk ct' (allRhos,liveRhos) ty = 
+  let superOfClassTy ct' classTyp = 
+    let (tycon,rargs,tyargs) = match classTyp with 
+      | Type.ConApp {Type.tycon; rAlloc; rBar; tyArgs} -> 
+            (tycon, rAlloc::rBar, tyArgs) 
+      | _ -> exit 1 in
+    let (rhoSubstFn,alphaSubstFn)= unifyTyconArgs ct' 
+                                     tycon rargs tyargs in
+    let k = CT.find tycon ct' in 
+    let formalSuper = Class.super k in
+    let actualSuper = Type.mapRegionVars rhoSubstFn formalSuper |>
+                      Type.mapTyvars alphaSubstFn in
+      actualSuper
+    
+  let rec subtypeOk ct' (liveRhos,tyVE) (subTy,supTy) =
     let open Type in
-    let type_ok = typeOk ct' (allRhos,liveRhos) in
+    let subtype_ok = subtypeOk ct' (liveRhos,tyVE) in
+    let areEq = Type.equal (subTy,supTy) in
+    let areSub =
+      match (subTy,supTy) with
+        | (Any, Object _) | (Any, Region _) 
+        | (Any, ConApp _) -> Phi.truee (* Null *)
+        | (Tyvar tyv, Object _) | (Tyvar tyv, Region  _)
+        | (Tyvar tyv, ConApp _) -> subtype_ok (TyVE.find tyv tyVE,supTy)
+        | (ConApp args1,ConApp args2) -> 
+            if Tycon.equal (args1.tycon, args2.tycon) then
+              Phi.falsee (* areEq will anyway be true *)
+            else
+              let superOfSubTy = superOfClassTy ct' subTy in
+                subtype_ok (superOfSubTy,supTy)
+        | _ -> Phi.falsee in
+      Phi.disj [areEq; areSub]
+
+  let rec typeOk ct' (allRhos,liveRhos) tyVE ty = 
+    let open Type in
+    let type_ok = typeOk ct' (allRhos,liveRhos) tyVE in
       match ty with
         | Object rho -> Phi.inSet (rho,liveRhos)
         | Region args ->
@@ -134,42 +166,17 @@ struct
             let rhoSubstFn = mkSubstFn (rhoA::rhoBar) (rA::rBar) in
             let phi = Class.phi k in
             let c4 = Phi.mapRegionVars rhoSubstFn phi in
-            let c5 = List.map (fun r -> Phi.outlives (r,rA)) rBar in
-              Phi.conj @@ List.concat [c1; [c2; c3; c4;]; c5]
+            (* c5 below is not needed as we are explcitly recording all
+             * constraints *)
+            (*let c5 = List.map (fun r -> Phi.outlives (r,rA)) rBar in*)
+            let psiI = Type.mapRegionVars rhoSubstFn in 
+            let tyvarBounds = List.map (fun (_,b) -> psiI b)
+                                (Class.tyvars k) in
+            let subtype_ok = fun t1 -> fun t2 -> 
+                              subtypeOk ct' (liveRhos,tyVE) (t1,t2) in
+            let c6 = List.map2 subtype_ok args.tyArgs tyvarBounds in
+              Phi.conj @@ List.concat [c1; [c2; c3; c4;](*; c5*);c6]
         | _ -> Phi.truee
-
-  let superOfClassTy ct' classTyp = 
-    let (tycon,rargs,tyargs) = match classTyp with 
-      | Type.ConApp {Type.tycon; rAlloc; rBar; tyArgs} -> 
-            (tycon, rAlloc::rBar, tyArgs) 
-      | _ -> exit 1 in
-    let (rhoSubstFn,alphaSubstFn)= unifyTyconArgs ct' 
-                                     tycon rargs tyargs in
-    let k = CT.find tycon ct' in 
-    let formalSuper = Class.super k in
-    let actualSuper = Type.mapRegionVars rhoSubstFn formalSuper |>
-                      Type.mapTyvars alphaSubstFn in
-      actualSuper
-    
-
-  let rec subtypeOk ct' (liveRhos,tyVE) (subTy,supTy) =
-    let open Type in
-    let subtype_ok = subtypeOk ct' (liveRhos,tyVE) in
-    let areEq = Type.equal (subTy,supTy) in
-    let areSub =
-      match (subTy,supTy) with
-        | (Any, Object _) | (Any, Region _) 
-        | (Any, ConApp _) -> Phi.truee (* Null *)
-        | (Tyvar tyv, Object _) | (Tyvar tyv, Region  _)
-        | (Tyvar tyv, ConApp _) -> subtype_ok (TyVE.find tyv tyVE,supTy)
-        | (ConApp args1,ConApp args2) -> 
-            if Tycon.equal (args1.tycon, args2.tycon) then
-              Phi.falsee (* areEq will anyway be true *)
-            else
-              let superOfSubTy = superOfClassTy ct' subTy in
-                subtype_ok (superOfSubTy,supTy)
-        | _ -> Phi.falsee in
-      Phi.disj [areEq; areSub]
 
   (*
    * What is the type of method classTyp.mname ?
@@ -268,7 +275,7 @@ struct
     let (allRhos,liveRhos) = (ctxt.allRhos, ctxt.liveRhos) in
     let (tyVE, ve, rAlloc) = (ctxt.tyVE, ctxt.ve, ctxt.rhoAlloc) in
     let templateTy = templateTy ct' in
-    let type_ok = typeOk ct' (allRhos,liveRhos) in
+    let type_ok = typeOk ct' (allRhos,liveRhos) ctxt.tyVE in
     let rgn_type_of_var = typeOfVar ve in
     let (node,ty) = (A.Expr.node exp, A.Expr.typ exp) in
     let doIt = elabExpr ct' ctxt in
@@ -363,7 +370,7 @@ struct
     let (allRhos,liveRhos) = (ctxt.allRhos, ctxt.liveRhos) in
     let (tyVE, ve, rhoAlloc) = (ctxt.tyVE, ctxt.ve, ctxt.rhoAlloc) in
     let templateTy = templateTy ct' in
-    let type_ok = typeOk ct' (allRhos,liveRhos) in
+    let type_ok = typeOk ct' (allRhos,liveRhos) ctxt.tyVE in
     let subtype_ok = subtypeOk ct' (liveRhos,tyVE) in
     let rgn_type_of_var = typeOfVar ve in
       match stmt with
@@ -450,6 +457,20 @@ struct
         ~super: super' ~fields: (List.combine fields fieldTyps')
         ~ctors: [] ~methods: []
 
+  let bootStrapTyVE k = 
+    let tyvardecs = Class.tyvars k in
+      L.fold_right (fun (tyvar,typ) tyVE' -> 
+                      TyVE.add tyvar typ tyVE') tyvardecs (TyVE.empty)
+
+  let bootStrapVE  ct' ve tycon =
+    let k = CT.find tycon ct' in
+    let tyvars = Class.tyvars k |> List.map fst in
+    let tyargs = List.map Type.var tyvars in
+    let (rAlloc, rBar) = (Class.rhoAlloc k, Class.rhoBar k) in
+    let thisRgnTyp = Type.mkApp (tycon,rAlloc,rBar,tyargs) in
+    let thisVar = Var.fromString "this" in
+      VE.add thisVar thisRgnTyp ve
+
   let elaborateHeader ct' k = 
     let hdK= headerTemplate ct' k in
     let _ =
@@ -468,7 +489,8 @@ struct
     let (fields,fieldTyps) = List.split (Class.fields hdK) in
     let allRhos = RVSet.of_list @@ rhoAlloc::rhoBar in
     let liveRhos = RVSet.of_list @@ rhoAlloc::rhoBar in
-    let type_ok = typeOk ct'' (allRhos, liveRhos) in
+    let tyVE = bootStrapTyVE hdK in
+    let type_ok = typeOk ct'' (allRhos, liveRhos) tyVE in
     let c1 = Phi.conj @@ List.map type_ok tyvarBounds in
     let c2 = type_ok super in
     let c3 = Phi.conj @@ List.map type_ok fieldTyps in
@@ -488,21 +510,6 @@ struct
         ~super: super ~fields: (List.combine fields fieldTyps)
         ~ctors: [] ~methods: []
 
-  let bootStrapTyVE ct' tyVE tycon = 
-    let k = CT.find tycon ct' in
-    let tyvardecs = Class.tyvars k in
-      L.fold_right (fun (tyvar,typ) tyVE' -> 
-                      TyVE.add tyvar typ tyVE') tyvardecs tyVE
-
-  let bootStrapVE  ct' ve tycon =
-    let k = CT.find tycon ct' in
-    let tyvars = Class.tyvars k |> List.map fst in
-    let tyargs = List.map Type.var tyvars in
-    let (rAlloc, rBar) = (Class.rhoAlloc k, Class.rhoBar k) in
-    let thisRgnTyp = Type.mkApp (tycon,rAlloc,rBar,tyargs) in
-    let thisVar = Var.fromString "this" in
-      VE.add thisVar thisRgnTyp ve
-
   let elabCtor ct' (ctor:A.Con.t)= 
     let tycon = A.Con.tycon ctor in
     let hdK = CT.find tycon ct' in
@@ -521,12 +528,12 @@ struct
                  ~body: (Stmt.Seq []) in
     let consKX = {hdK with Class.ctors = ctorX::otherCtors} in
     let ct'' = CT.add tycon consKX ct' in
-    let type_ok = typeOk ct'' (allRhos, liveRhos) in
+    let tyVE = bootStrapTyVE hdK in
+    let type_ok = typeOk ct'' (allRhos, liveRhos) tyVE in
     let c1 = Phi.conj @@ List.map type_ok paramTysX in
     let thisVE = bootStrapVE ct'' (VE.empty) tycon in
     let extendedVE = List.fold_right2 VE.add 
                        params paramTysX thisVE in
-    let tyVE = bootStrapTyVE ct'' (TyVE.empty) tycon in
     let (stmtX,ctxt',c2) = 
     (*
      * inAllocCtxt for ctor body is same as that of the class.
@@ -552,7 +559,7 @@ struct
                         ~params:(List.combine params paramTys')
                         ~body:stmt' in
     let ctors' = ctor'::otherCtors in
-    let phi_cx' = Phi.conj [phi_cx;phi_sol] in
+    let phi_cx' = CS.elimCommonSubExp @@ Phi.conj [phi_cx;phi_sol] in
     let hdK' = {hdK with Class.phi=phi_cx'; ctors=ctors'} in
       (*Class.make
         ~tycon: tycon ~rhoAlloc: rhoAlloc ~rhoBar: rhoBar
@@ -598,12 +605,12 @@ struct
                  ~body: (Stmt.Seq []) ~ret_type: retTyX in
     let methKX = {consK with Class.methods = methX::otherMeths} in
     let ct'' = CT.add tycon methKX ct' in
-    let type_ok = typeOk ct'' (allRhos, liveRhos) in
+    let tyVE = bootStrapTyVE consK in
+    let type_ok = typeOk ct'' (allRhos, liveRhos) tyVE in
     let c1 = Phi.conj @@ List.map type_ok paramTysX in
     let thisVE = bootStrapVE ct'' (VE.empty) tycon in
     let extendedVE = List.fold_right2 VE.add 
                        params paramTysX thisVE in
-    let tyVE = bootStrapTyVE ct'' (TyVE.empty) tycon in
     let (stmtX,ctxt',c2) = 
       elabStmt ct'' {allRhos = allRhos; liveRhos = liveRhos; 
                      phi_cx = phi_B; tyVE = tyVE; ve = extendedVE; 
