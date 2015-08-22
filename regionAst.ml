@@ -8,9 +8,13 @@ module MN = MethodName
 module RegionVar =
 struct
   type typ = Rho | R | Dummy
-  type t = T of typ ref * string 
+  type t = T of typ ref * int
 
-  let freshId = mkUidGen ""
+  let freshId = let count = ref 0 in
+    fun () -> 
+      let id = !count in
+      let _ = count := !count + 1 in
+        id
   let freshRho () = T (ref Rho, freshId ())
   let freshR () = T (ref R, freshId ())
   let dummy = T (ref Dummy,freshId ())
@@ -20,11 +24,13 @@ struct
     | T (x,id) -> (x := R)
   let equal (T (typ1,id1), T (typ2,id2)) = 
     (typ1.contents = typ2.contents) && (id1 = id2)
+  let compare (T (_,id1)) (T (_,id2)) = 
+    compare id1 id2
   let isDummy (T (typref,_)) = match !typref with
     | Dummy -> true | _ -> false
-  let toString (T (typref,s)) = match !typref with
-    | Rho -> "ρ"^s 
-    | R -> "R"^s 
+  let toString (T (typref,id)) = match !typref with
+    | Rho -> "ρ"^(string_of_int id) 
+    | R -> "R"^(string_of_int id)
     | Dummy -> "--dummy--"
   let isConcrete (T (typref,s)) = match !typref with
     | R -> true | Rho -> false 
@@ -305,11 +311,11 @@ struct
         | Null | Int _ | Bool _ | Var _ -> ret (node e)
         | FieldGet (e,f) -> ret @@ FieldGet (doIt e,f)
         | MethodCall x -> ret @@ MethodCall 
-                               {x with meth = (doIt @@ fst x.meth,
+                               {meth = (doIt @@ fst x.meth,
                                                snd x.meth);
-                                       rAlloc = f x.rAlloc;
-                                       rBar = List.map f x.rBar;
-                                       args = List.map doIt x.args}
+                                rAlloc = f x.rAlloc;
+                                rBar = List.map f x.rBar;
+                                args = List.map doIt x.args}
         | New (t,args) -> ret @@ New (doItTy t, List.map doIt args)
         | UnOpApp (unop,e) -> ret @@ UnOpApp (unop, doIt e)
         | BinOpApp (e1,binop,e2) -> ret @@ BinOpApp (doIt e1,binop,doIt e2)
@@ -319,7 +325,8 @@ struct
               ret @@ Pack(rho, mapRegionVars f' e')
 
   let rec toString (T (node,ty)) = 
-    "("^(nodeToString node)^":"^(Type.toString ty)^")"
+    nodeToString node
+    (*"("^(nodeToString node)^":"^(Type.toString ty)^")"*)
   and nodeToString = function
     | Null -> "Null" | Int i -> string_of_int i
     | Bool b -> string_of_bool b | Var v -> Var.toString v

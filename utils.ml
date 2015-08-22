@@ -56,6 +56,8 @@ let erongi f = (fun _ -> f ())
 
 let curry f = (fun x y -> f (x,y))
 
+let sgra f = (fun x y -> f y x)
+
 module type STRINGABLE = 
 sig
   type t

@@ -478,22 +478,22 @@ struct
       L.fold_right (fun (tyvar,typ) tyVE' -> 
                       TyVE.add tyvar typ tyVE') tyvardecs (TyVE.empty)
 
-  let bootStrapVE  ct' ve tycon =
-    let k = CT.find tycon ct' in
+  let bootStrapVE  k =
+    let tycon = Class.tycon k in
     let tyvars = Class.tyvars k |> List.map fst in
     let tyargs = List.map Type.var tyvars in
     let (rAlloc, rBar) = (Class.rhoAlloc k, Class.rhoBar k) in
     let thisRgnTyp = Type.mkApp (tycon,rAlloc,rBar,tyargs) in
     let thisVar = Var.fromString "this" in
-      VE.add thisVar thisRgnTyp ve
+      VE.add thisVar thisRgnTyp (VE.empty)
 
   let elaborateHeader ct' k = 
     let hdK= headerTemplate ct' k in
-    let _ =
+    let _ = if !Control.debug then
         begin
           print_string "Header template:\n";
           Class.print hdK;
-        end in
+        end else () in
     (* Recursive occurances of tycon are ok'ed under 
      * extended class table (ct'') *)
     let tycon = (A.Class.tycon k) in
@@ -513,17 +513,27 @@ struct
     let phi_cx = Phi.conj @@ List.map (* outlives guarantees *)
                   (fun rho -> Phi.outlives (rho,rhoAlloc)) rhoBar in
     let phi_cs = Phi.conj [c1; c2; c3] in
-    let {CS.fnM; residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
-    let phi_sol = CS.abduce (phi_cx,residuePhi) in 
-    let phi_cx' = Phi.conj [phi_cx;phi_sol] in
+    let {CS.fnM; fnF; residue} = CS.normalize (phi_cx,phi_cs) in
     (*
      * Constraints generated from the header contain no region vars in S2.
-     * Hence, CS.substFn is an identity.
+     * Hence, CS.fnM is an identity.
      *)
+    let phi_cx' = residue in
+    (* No need to abduce; residue is phi_sol *)
+    let psiI = Type.mapRegionVars fnF in
+    let tyvarBounds' = List.map psiI tyvarBounds in
+    let super' = psiI super in
+    let fieldTyps' = List.map psiI fieldTyps in
+    let rhoAlloc' = fnF rhoAlloc in
+    let rhoBar' = let open Type in RVSet.elements @@
+      (RVSet.of_list @@ List.concat [frvStar tyvarBounds'; 
+                                     frv super'; 
+                                     frvStar fieldTyps'])
+      -- (RVSet.singleton rhoAlloc') in
       Class.make
-        ~tycon: tycon ~rhoAlloc: rhoAlloc ~rhoBar: rhoBar
-        ~phi: phi_cx' ~tyvars: (List.combine tyvars tyvarBounds)
-        ~super: super ~fields: (List.combine fields fieldTyps)
+        ~tycon: tycon ~rhoAlloc: rhoAlloc' ~rhoBar: rhoBar'
+        ~phi: phi_cx' ~tyvars: (List.combine tyvars tyvarBounds')
+        ~super: super' ~fields: (List.combine fields fieldTyps')
         ~ctors: [] ~methods: []
 
   let elabCtor ct' (ctor:A.Con.t)= 
@@ -532,6 +542,9 @@ struct
     let rhoAlloc = Class.rhoAlloc hdK in
     let rhoBar = Class.rhoBar hdK in
     let phi_B = Class.phi hdK(* class's guarantees *) in
+    let (tyvars,tyvarBounds) = List.split (Class.tyvars hdK) in
+    let super = Class.super hdK in
+    let (fields,fieldTyps) = List.split (Class.fields hdK) in
     let otherCtors = Class.ctors hdK in
     let allRhos = RVSet.of_list @@ rhoAlloc::rhoBar in
     let liveRhos = RVSet.of_list @@ rhoAlloc::rhoBar in
@@ -547,7 +560,7 @@ struct
     let tyVE = bootStrapTyVE hdK in
     let type_ok = typeOk ct'' (allRhos, liveRhos) tyVE in
     let c1 = Phi.conj @@ List.map type_ok paramTysX in
-    let thisVE = bootStrapVE ct'' (VE.empty) tycon in
+    let thisVE = bootStrapVE consKX in
     let extendedVE = List.fold_right2 VE.add 
                        params paramTysX thisVE in
     let (stmtX,ctxt',c2) = 
@@ -563,10 +576,11 @@ struct
      * Note: Free RVs in paramTysX were not concretized. So, substFn 
      * should contain their assignments.
      *)
-    let {CS.fnM;residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
+    let {CS.fnM; fnF; residue} = CS.normalize (phi_cx,phi_cs) in
+    (* No need to abduce; residue is phi_sol *)
+    let phi_cx' = residue in
     let substFn = fun rv -> if RV.isConcrete rv 
-                            then rv else fnM rv in
-    let phi_sol = CS.abduce (phi_cx,residuePhi) in 
+                            then fnF rv else fnM rv in
     let psiI = Type.mapRegionVars substFn in
     let psiStmt = Stmt.mapRegionVars substFn in
     let paramTys' = List.map psiI paramTysX in
@@ -574,13 +588,21 @@ struct
     let ctor' = Con.make ~tycon:tycon 
                         ~params:(List.combine params paramTys')
                         ~body:stmt' in
-    let ctors' = ctor'::otherCtors in
-    let phi_cx' = CS.elimCommonSubExp @@ Phi.conj [phi_cx;phi_sol] in
-    let hdK' = {hdK with Class.phi=phi_cx'; ctors=ctors'} in
-      (*Class.make
-        ~tycon: tycon ~rhoAlloc: rhoAlloc ~rhoBar: rhoBar
-        ~phi: phi_cx' ~tyvars: tyvars ~super: super ~fields: fields
-        ~ctors: ctors' ~methods: [] in*)
+    let ctors' = List.snoc otherCtors ctor' in
+    let tyvarBounds' = List.map psiI tyvarBounds in
+    let super' = psiI super in
+    let fieldTyps' = List.map psiI fieldTyps in
+    let rhoAlloc' = substFn rhoAlloc in
+    let rhoBar' = let open Type in RVSet.elements @@
+      (RVSet.of_list @@ List.concat [frvStar tyvarBounds'; 
+                                     frv super'; 
+                                     frvStar fieldTyps'])
+      -- (RVSet.singleton rhoAlloc') in
+    let hdK' = Class.make
+        ~tycon: tycon ~rhoAlloc: rhoAlloc' ~rhoBar: rhoBar'
+        ~phi: phi_cx' ~tyvars: (List.combine tyvars tyvarBounds')
+        ~super: super' ~fields: (List.combine fields fieldTyps')
+        ~ctors: ctors' ~methods: [] in
       CT.add tycon hdK' ct'
 
   let elaborateCons ct' (k,hdK) = 
@@ -624,7 +646,7 @@ struct
     let tyVE = bootStrapTyVE consK in
     let type_ok = typeOk ct'' (allRhos, liveRhos) tyVE in
     let c1 = Phi.conj @@ List.map type_ok paramTysX in
-    let thisVE = bootStrapVE ct'' (VE.empty) tycon in
+    let thisVE = bootStrapVE methKX in
     let extendedVE = List.fold_right2 VE.add 
                        params paramTysX thisVE in
     let (stmtX,ctxt',c2) = 
@@ -636,55 +658,78 @@ struct
      *)
     let stmtTyX = typeOfStmt stmtX in 
     let c3 = subtypeOk ct'' (liveRhos,tyVE) (stmtTyX,retTyX) in
-    let _ = 
+    (*let _ = 
       begin
         Printf.printf "**** (%s <: %s): ***\n" 
           (Type.toString stmtTyX) (Type.toString retTyX); 
         print_string @@ Phi.toString c3;
         print_string "\n";
-      end in
+      end in*)
     let phi_cx = ctxt'.phi_cx in
     let phi_cs = Phi.conj [c1;c2;c3] in
-    let {CS.fnM;residue=residuePhi} = CS.normalize (phi_cx,phi_cs) in
+    let {CS.fnM; fnF; residue} = CS.normalize (phi_cx,phi_cs) in
+    let phi_cx_sol = Phi.conj @@ List.mapSome 
+             (fun rv -> if RV.equal (fnF rv,rv) 
+                        then None 
+                        else Some (Phi.equal (rv,fnF rv))) 
+             (rhoAlloc::rhoBar) in
+    let phi_sol = CS.abduce (Phi.conj [phi_cx; phi_cx_sol],
+                             residue) in 
+    let phi_cx' = Phi.conj [phi_cx_sol; phi_sol] in
     let substFn = fun rv -> if RV.isConcrete rv 
-                            then rv else fnM rv in
-    let phi_sol = CS.abduce (phi_cx,residuePhi) in 
+                            then fnF rv else fnM rv in
+    let psiI = Type.mapRegionVars fnF in
     let psiStmt = Stmt.mapRegionVars substFn in
+    let paramTys' = List.map psiI paramTysX in
+    let retTy' = psiI retTyX in
+    let rhoAllocM' = fnF rhoAllocM in
+    let rhoBarM' = let open Type in RVSet.elements @@
+      (RVSet.of_list @@ List.concat [frvStar paramTys'; 
+                                     frv retTy'])
+      -- (RVSet.singleton rhoAllocM') in
     let stmt' = psiStmt (stmtX) in
-    let meth' = {methX with Method.phi=phi_sol; body=stmt'} in
-    let fullK = {consK with Class.methods = meth'::otherMeths} in
+    let meth' = Method.make ~name: (A.Method.name meth)
+                 ~rhoAlloc: rhoAllocM' ~rhoBar: rhoBarM'
+                 ~phi: phi_cx' ~params: (List.combine params paramTys')
+                 ~body: stmt'  ~ret_type: retTy' in
+    let fullK = {consK with 
+                     Class.methods = List.snoc otherMeths meth'} in
       CT.add tycon fullK ct'
 
   let elaborateMeths ct' (k,consK) =
     let tycon = Class.tycon consK in
     let meths = List.map (fun m -> (tycon,m)) (A.Class.methods k) in
+    (*
+     * !! Assump: no mutual recursion !!
+     * fold_left ensures that defs are processed from top to bottom.
+     *)
     let ct'' = List.fold_left elabMeth ct' meths in
       CT.find tycon ct''
 
   let elabClass (ct':RegionAst.Class.t CT.t) (k:Ast.Class.t) =
     let hdB = elaborateHeader ct' k in
-    let _ =
+    let _ = if !Control.debug then
         begin
           print_string "\nAfter header elaboration:\n";
           Class.print hdB;
-        end in
+        end else () in
     (* Recursive occurances of tycon need
      * extended class table (ct'') *)
     let tycon = (Class.tycon hdB) in
     let ct'' = CT.add tycon hdB ct' in
     let consB = elaborateCons ct'' (k,hdB) in
-    let _ =
+    let _ = if !Control.debug then 
         begin
           print_string "\nAfter cons elaboration:\n";
           Class.print consB;
-        end in
+        end else () in
     let ct'' = CT.add tycon consB ct' in
     let fullB = elaborateMeths ct'' (k,consB) in
-    let _ =
+    let _ = if !Control.debug then 
         begin
           print_string "\nAfter full elaboration:\n";
           Class.print fullB;
-        end in
+        end else () in
       fullB
 
   let elabClassTable tycons (ct : Ast.Class.t CT.t) =

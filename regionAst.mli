@@ -10,6 +10,7 @@ sig
   val freshR : unit -> t
   val concretize : t -> unit
   val equal : t * t -> bool
+  val compare : t -> t -> int (* For OCaml sort functions *)
   val isDummy : t -> bool
   val isConcrete : t -> bool
 end
@@ -36,6 +37,7 @@ end
 module ConstraintSolve :
 sig
   type sol_t = {fnM: RegionVar.t -> RegionVar.t;
+                fnF: RegionVar.t -> RegionVar.t;
                 residue: RegionConstraint.t;}
 
   val elimCommonSubExp : RegionConstraint.t -> RegionConstraint.t 

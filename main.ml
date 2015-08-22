@@ -36,7 +36,9 @@ let makeClassTable ks =
 let _ =
   let files = ref [] in
   Arg.parse
-    []
+    [("-debug",
+      Arg.Unit (fun () -> Control.debug := true),
+      "true iff debug")]
     (fun file -> files := !files @ [file])
     ("broomc: Broom compiler. Copyright(c) Microsoft Research\n" ^
      "  usage: broomc [<option>] <file0> <file1> ...\n");
@@ -70,10 +72,10 @@ let _ =
       let ct'' = RegionTypeInfer.doIt tycons ct' in
         begin
           print_string "\nPost Region Type Inference:\n";
-          CT.iter (fun tycon k -> 
+          List.iter (fun tycon -> 
             begin
-              RegionAst.Class.print k;
-            end ) ct'';
+              RegionAst.Class.print (CT.find tycon ct'');
+            end ) tycons;
         end
     with
       e -> close_in channel; raise e
