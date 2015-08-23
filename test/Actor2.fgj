@@ -1,0 +1,64 @@
+class Item {
+  int itemId;
+  int category;
+  Item(int itemId, int category) {
+    this.itemId = itemId;
+    this.category = category;
+  }
+  Item Clone() {
+    return new Item(this.ItemId, this.Category);
+  }
+}
+
+class ItemList {
+  LinkedList<Item> _items;
+  ItemList() {
+    this._items = new LinkedList<Item>();
+    int i = 0;
+    while (i<10000) {
+      this._items.add(new Item(0,0));
+    }
+  }
+}
+
+class ListActor {
+  int BUFFER_SIZE = 100;
+  Region<LinkedList<Region<ItemList>>> _actorRegion;
+  int _recvCount;
+  ListActor() {
+    let Func<void,LinkedList<ItemList>>>> f = 
+                  \_ -> new LinkedList<Region<ItemList>>>();
+    this._actorRegion = new Region<LinkedList<Region<ItemList>>>(f);
+    this._recvCount = 0;
+  }
+  void onRecv(Region<ItemList> msgRgn) {
+    this._recvCount++;
+    openalloc (this._actorRegion) withroot _list {
+      _list.add(msgRgn);
+    }
+    if (this._recvCount % this.BUFFER_SIZE == 0) {
+      let int count = 0;
+      open this._actorRegion withroot _list {
+        while(count < BUFFER_SIZE) {
+          let Region<ItemList> itemListRgn = _list.removeAtAndGet(0);
+          itemListRgn.free();
+        }
+      }
+    }
+  }
+}
+
+class Program {
+  void main () {
+    let ListActor actor = new ListActor();
+    int count = 0;
+    while (count < 10000) {
+      let Region<ItemList> messageRegion = new Region<ItemList>();
+      openalloc (messageRegion) {
+        let ItemList itemList = new ItemList();
+        messageRegion.setRoot(itemList);
+      }
+      actor.onRecv(messageRegion);
+    }
+  }
+}
