@@ -1,0 +1,25 @@
+class Document extends ICloneable
+{
+  int id;
+  int length;
+  int authorId;
+  string title;
+
+  Document(int docId, int docLength, int docAuthorID, string docTitle)
+  {
+    this.id = docId;
+    this.length = docLength;
+    this.authorId = docAuthorID;
+    this.title = docTitle;
+  }
+  object clone()
+  {
+    return new Document(this.id, this.length, this.authorId,
+                                  Misc.strClone(title));
+  }
+  bool equals(Document other)
+  {
+    return (this.id == other.id && this.length == other.length &&
+      this.authorId == other.authorId && this.title == other.title;
+  }
+}

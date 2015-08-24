@@ -1,0 +1,48 @@
+class TestRegionSelect extends Object
+{
+  void Execute(List<string> args)
+  {
+    RegionSelectVertex<Document, int> selectVertex =
+      new RegionSelectVertex<Document, int>(
+          \document => (document.id < 1000) ? true : false);
+    PlayData(selectVertex, args.get(0));
+  }
+
+  void PlayData(RegionSelectVertex<Document, int> selectVertex,
+                string filename)
+  {
+    while (true)
+    {
+      let string line = *; /*File.OpenText(filename).ReadLine()*/
+      if (line == null) {
+        /*break;*/
+      }
+      let List<string> elements = Util.Split(" ");*/
+      let int time = Util.toInt(elements.get(1));
+      let int batch_size = Util.toInt(elements.get(2));
+      letregion
+      {
+        if (elements.get(0) == "BEGIN")
+        {
+          Message<int, Document> msg =
+            new Message<int, Document>(time, batch_size);
+          int i = 0;
+          while (i < batch_size)
+          {
+            msg.put(new Document(Misc.toInt(elements.get(1)),
+                                       Misc.toInt(elements.get(2)),
+                                       Misc.toInt(elements.get(3)),
+                                       elements.get(4)));
+            i = i+1;
+          }
+          selectVertex.onReceive(msg);
+        }
+        else if (elements.get(0) == "END")
+        {
+          selectVertex.onNotify(time);
+        }
+      }
+    }
+  }
+
+}

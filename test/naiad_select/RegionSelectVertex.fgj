@@ -1,0 +1,40 @@
+class RegionSelectVertex<'TInput extends ICloneable, 'TTime extends Object> extends Object
+  {
+    Func<'TInput, bool> function;
+
+    RegionSelectVertex(Func<'TInput, bool> fun)
+    {
+      this.function = fun;
+    }
+
+    void onReceive(Message<'TTime, 'TInput> message)
+    {
+      let Func<void,Buffer<'TTime, 'TInput>> f = 
+          \_ -> new Buffer<'TTime, 'TInput>(message.time);
+      let Region<Buffer<'TTime, 'TInput>> outputRegion =
+        new Region<Buffer<'TTime, 'TInput>>(f);
+      int outputOffset = 0;
+
+      letregion
+      {
+        int i = 0;
+        while (i < message.length)
+        {
+          let 'TInput payload = message.getPayload(i);
+          if (function(payload))
+          {
+            open outputRegion withroot outputBuf {
+              outputBuf.set(outputOffset, payload);
+            }
+            outputOffset = outputOffset+1;
+          }
+          i = i+1;
+        }
+      }
+      // The region will be freed.
+      outputRegion.transfer();
+    }
+    void onNotify('TTime time)
+    {
+    }
+  }
