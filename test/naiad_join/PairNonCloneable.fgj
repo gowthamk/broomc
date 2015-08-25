@@ -1,0 +1,23 @@
+class PairNonCloneable<Tfirst, Tsecond> extends Object
+{
+  Tfirst first;
+  Tsecond second;
+
+  PairNonCloneable(Tfirst first, Tsecond second)
+  {
+    this.first = first;
+    this.second = second;
+  }
+
+  string toString()
+  {
+    return "[" + this.first.toString() + " " 
+               + this.second.toString() + ")";
+  }
+
+  bool equals(PairNonCloneable<Tfirst, Tsecond> other)
+  {
+    return this.first.equals(other.first) && 
+           this.second.equals(other.second);
+  }
+}

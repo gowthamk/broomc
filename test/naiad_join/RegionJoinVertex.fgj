@@ -1,0 +1,169 @@
+class RegionJoinVertex<TInput1 extends ICloneable, 
+                       TInput2 extends ICloneable, 
+                       TKey, TOutput, TTime> extends Object
+{
+  Func<TInput1, TKey> keySelector1;
+  Func<TInput2, TKey> keySelector2;
+  Func<TInput1, TInput2, TOutput> resSelector;
+
+  Dictionary<TTime, Region<Dictionary<TKey, 
+                           PairNonCloneable<List<TInput1>, 
+                                            List<TInput2>>>>> dictRegions;
+
+  RegionJoinVertex(Func<TInput1, TKey> keySel1,
+                          Func<TInput2, TKey> keySel2,
+                          Func<TInput1, TInput2, TOutput> resSel)
+  {
+    this.keySelector1 = keySel1;
+    this.keySelector2 = keySel2;
+    this.resSelector = resSel;
+    this.dictRegions = new Dictionary<TTime, 
+                               Region<Dictionary<TKey, 
+                                                 PairNonCloneable<List<TInput1>, 
+                                                                  List<TInput2>>>>> ();
+  }
+
+  void onReceive(Message<TTime, TInput1> message)
+  {
+    let Func<void,Buffer<TTime, TOutput>> f = 
+        \_ -> new Buffer<TTime, TOutput>(outputRegion, message.time);
+    let Region<Buffer<TTime, TOutput>> outputRegion = 
+            new Region<Buffer<TTime, TOutput>>(f);
+    int outputOffset = 0;
+
+    if (!this.dictRegions.containsKey(message.time))
+    {
+      let Func(void,Dictionary<TKey, PairNonCloneable<List<TInput1>,
+                                                      List<TInput2>>>) f= 
+            \_ -> new Dictionary<TKey, /*dictKeyPair*/
+                                 PairNonCloneable<List<TInput1>, 
+                                                  List<TInput2>>>();
+      let Region<Dictionary<TKey, PairNonCloneable<List<TInput1>, 
+                                                   List<TInput2>>>> dictRegion = 
+          new Region<Dictionary<TKey, 
+                     PairNonCloneable<List<TInput1>, 
+                                      List<TInput2>>>>(f) = 
+      this.dictRegions.add(message.time, dictRegion);
+    }
+    let Region<Dictionary<TKey, 
+                          PairNonCloneable<List<TInput1>, 
+                                           List<TInput2>>>> dictRegion =
+        this.dictRegions.lookup(message.time);
+    /*
+     * dictRegion is region corresponding to message.time.
+     */
+    openalloc dictRegion withroot dictKeys 
+    {
+      let int i = 0
+      let PairNonCloneable<List<TInput1>, List<TInput2>> currentEntry;
+      let TInput1 curInput;
+      while (i < message.length)
+      {
+        // Note: Automatically annotated code may require this Clone, but
+        // in the manually written one we don't need it.(* GK: I
+        // disagree *)
+        // curInput = (TInput1)message.get(i).Clone();
+        curInput = (TInput1)message.get(i);
+        let TKey key = this.keySelector1(curInput);
+        if (!dictKeys.mem(key))
+        {
+          currentEntry = new PairNonCloneable<List<TInput1>, List<TInput2>>(
+              new List<TInput1>(), new List<TInput2>());
+          dictKeys.add(key, currentEntry);
+        }
+        else {
+          currentEntry = dictKeys.lookup(key);
+        }
+        currentEntry.first.add(curInput);
+        ListNode<TInput2> cur = currentEntry.second.head;
+        while (cur != NULL)
+        {
+          let TOutput output = this.resSelector(curInput, cur.data);
+          open outputRegion withroot outputBuf 
+          {
+            outputBuf.set(outputOffset, output);
+          }
+          outputOffset = outputOffset+1;
+          cur = cur.Next;
+        }
+        i = i+1;
+      }
+    }
+    // The region will be freed.
+    outputRegion.transfer();
+  }
+
+  void onReceive(Message<TTime, TInput2> message)
+  {
+    let Func<void,Buffer<TTime, TOutput>> f = 
+        \_ -> new Buffer<TTime, TOutput>(outputRegion, message.time);
+    let Region<Buffer<TTime, TOutput>> outputRegion = 
+            new Region<Buffer<TTime, TOutput>>(f);
+    int outputOffset = 0;
+
+    let Func(void,Dictionary<TKey, PairNonCloneable<List<TInput1>,
+                                                    List<TInput2>>>) f= 
+          \_ -> new Region<Dictionary<TKey, /*dictKeyPair*/
+                           PairNonCloneable<List<TInput1>, 
+                                            List<TInput2>>>>();
+    let Region<Dictionary<TKey, PairNonCloneable<List<TInput1>, 
+                                                 List<TInput2>>>> dictRegion = 
+        new Region<Dictionary<TKey, 
+                   PairNonCloneable<List<TInput1>, 
+                                    List<TInput2>>>>(f) = 
+
+    if (!this.dictRegions.containsKey(message.time))
+    {
+      this.dictRegions.add(message.time, dictRegion);
+    }
+    open this.dictRegions.lookup(message.time) withroot dictRegion
+    {
+      openalloc dictRegion withroot dictKeys 
+      {
+        let int i = 0
+        let PairNonCloneable<List<TInput1>, List<TInput2>> currentEntry;
+        let TInput2 curInput;
+        while (i < message.length)
+        {
+          // Note: Automatically annotated code may require this Clone, but
+          // in the manually written one we don't need it.(* GK: I
+          // disagree *)
+          // curInput = (TInput2)message.get(i).Clone();
+          curInput = (TInput2)message.get(i);
+          let TKey key = this.keySelector2(curInput);
+          if (!dictKeys.mem(key))
+          {
+            currentEntry = new PairNonCloneable<List<TInput1>, List<TInput2>>(
+                new List<TInput1>(), new List<TInput2>());
+            dictKeys.add(key, currentEntry);
+          }
+          else {
+            currentEntry = dictKeys.lookup(key);
+          }
+          currentEntry.second.add(curInput);
+          ListNode<TInput1> cur = currentEntry.first.head;
+          while (cur != NULL)
+          {
+            let TOutput output = this.resSelector(cur.data,curInput);
+            open outputRegion withroot outputBuf 
+            {
+              outputBuf.set(outputOffset, output);
+            }
+            outputOffset = outputOffset+1;
+            cur = cur.Next;
+          }
+          i = i+1;
+        }
+      }
+    }
+    // The region will be freed.
+    outputRegion.transfer();
+  }
+
+  void onNotify(TTime time)
+  {
+    this.dictRegion.lookup(time).free();
+    this.dictRegions.remove(time);
+  }
+
+}

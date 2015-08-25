@@ -1,0 +1,32 @@
+class JoinOutput extends ICloneable
+{
+  string docTitle;
+  string authorName;
+  int authorAge;
+
+  string ToString()
+  {
+    return this.docTitle + " " + this.authorName + " " + this.authorAge;
+  }
+
+  JoinOutput(string title, string name, int age)
+  {
+    this.docTitle = title;
+    this.authorName = name;
+    this.authorAge = age;
+  }
+
+  object clone()
+  {
+    return new JoinOutput(String.clone(this.docTitle), 
+                          String.clone(this.authorName),
+                          this.authorAge);
+  }
+
+  bool Equals(JoinOutput other)
+  {
+    return this.docTitle == other.docTitle && 
+           this.authorName == other.authorName &&
+           this.authorAge == other.authorAge;
+  }
+}

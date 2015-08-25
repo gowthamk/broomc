@@ -1,0 +1,52 @@
+class Message<'TTime extends Object, 'TRecord extends ICloneable> extends ICloneable
+{
+  int DEFAULT_MESSAGE_LENGTH = 25;
+  'TTime time;
+  List<'TRecord> payload;
+  int length;
+  int offset;
+
+  Message('TTime time)
+  {
+    this.time = time;
+    this.payload = new 'TRecord[DEFAULT_MESSAGE_LENGTH];
+    this.length = DEFAULT_MESSAGE_LENGTH;
+    this.offset = 0;
+  }
+
+  Message('TTime time, int length)
+  {
+    this.time = time;
+    this.payload = new List<'TRecord>();
+    this.length = length;
+    this.offset = 0;
+  }
+
+  void put('TRecord record)
+  {
+    if (this.offset < this.length)
+    {
+      this.payload.add(record);
+      this.offset = this.offset + 1;
+    }
+    else
+    {
+      /*Console.Error.WriteLine("The message buffer is * overloaded!");*/
+    }
+  }
+  'TRecord get(int i) {
+    return this.payload.get(i);
+  }
+  object clone()
+  {
+    let Message<'TTime, 'TRecord> msg = 
+      new Message<'TTime, 'TRecord>(this.time, this.length);
+    int i = 0;
+    while (i < this.offset)
+    {
+      msg.put(('TRecord) this.payload.get(i).clone());
+      i = i+1;
+    }
+    return msg;
+  }
+}

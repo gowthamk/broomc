@@ -1,0 +1,213 @@
+class TestRegionJoin extends Object
+{
+  void Execute(List<string> args)
+  {
+    letregion 
+    {
+      RegionJoinVertex<Document, Author, int, JoinOutput, int> joinVertex =
+        new RegionJoinVertex<Document, Author, int, JoinOutput, int>(
+            document => document.authorId,
+            author => author.id,
+            (document, author) => new JoinOutput(document.title,
+                                                 author.name,
+                                                 author.age));
+      playDataFromMemory(joinVertex, args.get(0), args.get(1));
+    }
+  }
+
+  void playData(RegionJoinVertex<Document, Author, int, JoinOutput, int> joinVertex,
+                string docFileName, 
+                string authorFileName,
+                Region actorRegion) 
+  {
+    bool docEmpty = false;
+    bool authorEmpty = false;
+    letregion
+    {
+      while (!docEmpty || !authorEmpty)
+      {
+        let string line = *; /*authorFile.ReadLine();*/
+        if (line != null)
+        {
+          this.readAuthorBatch(authorFile, line, joinVertex);
+        }
+        else
+        {
+          authorEmpty = true;
+        }
+
+        line = *; /*docFile.ReadLine()*/;
+        if (line != null)
+        {
+          this.readDocBatch(docFile, line, joinVertex);
+        }
+        else
+        {
+          docEmpty = true;
+        }
+      }
+    }
+  }
+  void readAuthorBatch(StreamReader file,
+                       String line,
+                       RegionJoinVertex<Document, Author, int, JoinOutput, int> vertex)
+  {
+    let List<string> elements = line.split(' ');
+    let int time = Misc.toInt(elements.get(1));
+    let int batch_size = Misc.toInt(elements.get(2));
+    if (elements.get(0) == "BEGIN")
+    {
+      let Message<int, Author> msg =
+        new Message<int, Author>(time, batch_size);
+      let int i = 0;
+      while (i < batch_size)
+      {
+        let string fileLine = *;/* file.ReadLine() */
+        elements = fileLine.split(' ');
+        msg.put(new Author(Misc.toInt(elements.get(1)),
+                           elements.get(2),
+                           Misc.toInt(elements.get(3))));
+        i = i+1;
+      }
+      vertex.onReceive(msg);
+    }
+    else if (elements.get(0) == "END")
+    {
+      // NOTE: This is commented because we don't want to call onNotify
+      // twice for the same time epoch.
+      // vertex.onNotify(Misc.toInt(elements.get(1)));
+    }
+  }
+
+  Message<int, Author> readAuthorBatchMemory(StreamReader file,
+                                             String line)
+  {
+    let List<string> elements = line.split(' ');
+    let int time = Misc.toInt(elements.get(1));
+    let int batch_size = Misc.toInt(elements.get(2));
+    let Message<int, Author> msg =
+      new Message<int, Author>(time, batch_size);
+    let int i = 0;
+    while (i < batch_size)
+    {
+      let string fileLine = *;/* file.ReadLine() */
+      elements = fileLine.split(' ');
+      msg.put(new Author(Misc.toInt(elements.get(1)),
+                         elements.get(2),
+                         Misc.toInt(elements.get(3))));
+      i = i+1;
+    }
+    return msg;
+  }
+
+  void readDocBatch(StreamReader file,
+                    String line,
+                    RegionJoinVertex<Document, Author, int, JoinOutput, int> vertex)
+  {
+    let List<string> elements = line.split(' ');
+    let int time = Misc.toInt(elements.get(1));
+    let int batch_size = Misc.toInt(elements.get(2));
+    if (elements.get(0) == "BEGIN")
+    {
+      let Message<int, Document> msg =
+        new Message<int, Document>(time, batch_size);
+      let int i = 0;
+      while (i < batch_size)
+      {
+        let string fileLine = *;/* file.ReadLine() */
+        elements = fileLine.split(' ');
+        msg.put(new Document(Misc.toInt(elements.get(1)),
+                             Misc.toInt(elements.get(2)),
+                             Misc.toInt(elements.get(3)),
+                             elements.get(4)));
+        i = i+1;
+      }
+      vertex.onReceive(msg);
+    }
+    else if (elements.get(0) == "END")
+    {
+      vertex.onNotify(time);
+    }
+  }
+
+  Message<int, Document> readDocBatchMemory(StreamReader file,
+                                            String line)
+  {
+    let List<string> elements = line.split(' ');
+    let int time = Misc.toInt(elements.get(1));
+    let int batch_size = Misc.toInt(elements.get(2));
+    let Message<int, Document> msg =
+      new Message<int, Document>(time, batch_size);
+    let int i = 0;
+    while (i < batch_size)
+    {
+      let string fileLine = *;/* file.ReadLine() */
+      elements = fileLine.split(' ');
+      msg.put(new Document(Misc.toInt(elements.get(1)),
+                           Misc.toInt(elements.get(2)),
+                           Misc.toInt(elements.get(3)),
+                           elements.get(4)));
+      i = i+1;
+    }
+    return msg;
+  }
+
+  void playDataFromMemory(RegionJoinVertex<Document, Author, int, JoinOutput, int> 
+                                joinVertex,
+                          string docFileName, 
+                          string authorFileName) {
+    let int timeEpoch = 0;
+    List<Message<int, Document>> msgsDocs;
+    List<Message<int, Author>> msgsAuthors;
+    letregion 
+    {
+      bool docEmpty = false;
+      bool authorEmpty = false;
+      msgsDocs = new List<Message<int, Document>>();
+      msgsAuthors = new List<Message<int, Author>>();
+      while (!docEmpty || !authorEmpty)
+      {
+        let string line = *; /*docFile.ReadLine();*/
+        if (line != null)
+        {
+          let List<string> elements = line.split(' ');
+          if (elements.get(0) == "BEGIN")
+          {
+            timeEpoch = timeEpoch+1;
+            msgsDocs.add(this.readDocBatchMemory(docFile, line));
+          }
+        }
+        else
+        {
+          docEmpty = true;
+        }
+
+        line = *;/*authorFile.ReadLine();*/
+        if (line != null)
+        {
+          var elements = line.split(' ');
+          if (elements.get(0) == "BEGIN")
+            msgsAuthors.add(this.readAuthorBatchMemory(authorFile, line));
+        }
+        else
+        {
+          authorEmpty = true;
+        }
+      }
+      ListNode<Message<int, Document>> curDocs = msgsDocs.head;
+      ListNode<Message<int, Author>> curAuthors = msgsAuthors.head;
+      while (curDocs != null && curAuthors != null)
+      {
+        letregion 
+        {
+          joinVertex.onReceive((Message<int, Document>)curDocs.data);
+          joinVertex.onReceive((Message<int, Author>)curAuthors.data);
+          timeEpoch = timeEpoch - 1;
+          joinVertex.onNotify(timeEpoch);
+        }
+        curDocs = curDocs.Next;
+        curAuthors = curAuthors.Next;
+      }
+    }
+  }
+}

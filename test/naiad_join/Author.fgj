@@ -1,0 +1,28 @@
+class Author extends ICloneable
+{
+  int id;
+  string name;
+  int age;
+
+  string ToString()
+  {
+    return this.id + " " + this.name + " " + this.age;
+  }
+  Author(int authorId, string authorName, int authorAge)
+  {
+    this.id = authorId;
+    this.name = authorName;
+    this.age = authorAge;
+  }
+  object clone()
+  {
+    return new Author(this.id, String.clone(this.name), this.age);
+  }
+  bool equals(Author other)
+  {
+    return this.id == other.id && 
+           this.name == other.name && 
+           this.age == other.age;
+  }
+
+}
