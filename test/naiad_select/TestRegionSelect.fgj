@@ -17,7 +17,7 @@ class TestRegionSelect extends Object
       if (line == null) {
         /*break;*/
       }
-      let List<string> elements = Util.Split(" ");*/
+      let List<string> elements = line.split(" ");*/
       let int time = Util.toInt(elements.get(1));
       let int batch_size = Util.toInt(elements.get(2));
       letregion
@@ -29,10 +29,10 @@ class TestRegionSelect extends Object
           int i = 0;
           while (i < batch_size)
           {
-            msg.put(new Document(Misc.toInt(elements.get(1)),
-                                       Misc.toInt(elements.get(2)),
-                                       Misc.toInt(elements.get(3)),
-                                       elements.get(4)));
+            msg.put(new Document(Util.toInt(elements.get(1)),
+                                 Util.toInt(elements.get(2)),
+                                 Util.toInt(elements.get(3)),
+                                 elements.get(4)));
             i = i+1;
           }
           selectVertex.onReceive(msg);

@@ -15,7 +15,7 @@ class Document extends ICloneable
   object clone()
   {
     return new Document(this.id, this.length, this.authorId,
-                                  String.clone(title));
+                                  this.title.clone());
   }
   bool equals(Document other)
   {

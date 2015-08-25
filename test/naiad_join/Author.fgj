@@ -16,7 +16,7 @@ class Author extends ICloneable
   }
   object clone()
   {
-    return new Author(this.id, String.clone(this.name), this.age);
+    return new Author(this.id, this.name.clone(), this.age);
   }
   bool equals(Author other)
   {

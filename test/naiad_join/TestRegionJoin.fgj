@@ -53,8 +53,8 @@ class TestRegionJoin extends Object
                        RegionJoinVertex<Document, Author, int, JoinOutput, int> vertex)
   {
     let List<string> elements = line.split(' ');
-    let int time = Misc.toInt(elements.get(1));
-    let int batch_size = Misc.toInt(elements.get(2));
+    let int time = Util.toInt(elements.get(1));
+    let int batch_size = Util.toInt(elements.get(2));
     if (elements.get(0) == "BEGIN")
     {
       let Message<int, Author> msg =
@@ -64,9 +64,9 @@ class TestRegionJoin extends Object
       {
         let string fileLine = *;/* file.ReadLine() */
         elements = fileLine.split(' ');
-        msg.put(new Author(Misc.toInt(elements.get(1)),
+        msg.put(new Author(Util.toInt(elements.get(1)),
                            elements.get(2),
-                           Misc.toInt(elements.get(3))));
+                           Util.toInt(elements.get(3))));
         i = i+1;
       }
       vertex.onReceive(msg);
@@ -75,7 +75,7 @@ class TestRegionJoin extends Object
     {
       // NOTE: This is commented because we don't want to call onNotify
       // twice for the same time epoch.
-      // vertex.onNotify(Misc.toInt(elements.get(1)));
+      // vertex.onNotify(Util.toInt(elements.get(1)));
     }
   }
 
@@ -83,8 +83,8 @@ class TestRegionJoin extends Object
                                              String line)
   {
     let List<string> elements = line.split(' ');
-    let int time = Misc.toInt(elements.get(1));
-    let int batch_size = Misc.toInt(elements.get(2));
+    let int time = Util.toInt(elements.get(1));
+    let int batch_size = Util.toInt(elements.get(2));
     let Message<int, Author> msg =
       new Message<int, Author>(time, batch_size);
     let int i = 0;
@@ -92,9 +92,9 @@ class TestRegionJoin extends Object
     {
       let string fileLine = *;/* file.ReadLine() */
       elements = fileLine.split(' ');
-      msg.put(new Author(Misc.toInt(elements.get(1)),
+      msg.put(new Author(Util.toInt(elements.get(1)),
                          elements.get(2),
-                         Misc.toInt(elements.get(3))));
+                         Util.toInt(elements.get(3))));
       i = i+1;
     }
     return msg;
@@ -105,8 +105,8 @@ class TestRegionJoin extends Object
                     RegionJoinVertex<Document, Author, int, JoinOutput, int> vertex)
   {
     let List<string> elements = line.split(' ');
-    let int time = Misc.toInt(elements.get(1));
-    let int batch_size = Misc.toInt(elements.get(2));
+    let int time = Util.toInt(elements.get(1));
+    let int batch_size = Util.toInt(elements.get(2));
     if (elements.get(0) == "BEGIN")
     {
       let Message<int, Document> msg =
@@ -116,9 +116,9 @@ class TestRegionJoin extends Object
       {
         let string fileLine = *;/* file.ReadLine() */
         elements = fileLine.split(' ');
-        msg.put(new Document(Misc.toInt(elements.get(1)),
-                             Misc.toInt(elements.get(2)),
-                             Misc.toInt(elements.get(3)),
+        msg.put(new Document(Util.toInt(elements.get(1)),
+                             Util.toInt(elements.get(2)),
+                             Util.toInt(elements.get(3)),
                              elements.get(4)));
         i = i+1;
       }
@@ -134,8 +134,8 @@ class TestRegionJoin extends Object
                                             String line)
   {
     let List<string> elements = line.split(' ');
-    let int time = Misc.toInt(elements.get(1));
-    let int batch_size = Misc.toInt(elements.get(2));
+    let int time = Util.toInt(elements.get(1));
+    let int batch_size = Util.toInt(elements.get(2));
     let Message<int, Document> msg =
       new Message<int, Document>(time, batch_size);
     let int i = 0;
@@ -143,9 +143,9 @@ class TestRegionJoin extends Object
     {
       let string fileLine = *;/* file.ReadLine() */
       elements = fileLine.split(' ');
-      msg.put(new Document(Misc.toInt(elements.get(1)),
-                           Misc.toInt(elements.get(2)),
-                           Misc.toInt(elements.get(3)),
+      msg.put(new Document(Util.toInt(elements.get(1)),
+                           Util.toInt(elements.get(2)),
+                           Util.toInt(elements.get(3)),
                            elements.get(4)));
       i = i+1;
     }

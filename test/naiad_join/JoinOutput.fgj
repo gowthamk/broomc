@@ -18,8 +18,8 @@ class JoinOutput extends ICloneable
 
   object clone()
   {
-    return new JoinOutput(String.clone(this.docTitle), 
-                          String.clone(this.authorName),
+    return new JoinOutput(this.docTitle.clone(), 
+                          this.authorName.clone(),
                           this.authorAge);
   }
 

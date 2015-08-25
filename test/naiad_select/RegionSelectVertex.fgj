@@ -13,14 +13,17 @@ class RegionSelectVertex<'TInput extends ICloneable, 'TTime extends Object> exte
           \_ -> new Buffer<'TTime, 'TInput>(message.time);
       let Region<Buffer<'TTime, 'TInput>> outputRegion =
         new Region<Buffer<'TTime, 'TInput>>(f);
-      int outputOffset = 0;
+      let int outputOffset = 0;
 
       letregion
       {
-        int i = 0;
+        let int i = 0;
         while (i < message.length)
         {
-          let 'TInput payload = message.getPayload(i);
+          let 'TInput payload = message.get(i);
+          /*
+           * Should be message.get(i).clone instead.
+           */
           if (function(payload))
           {
             open outputRegion withroot outputBuf {
