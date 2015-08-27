@@ -1,0 +1,35 @@
+class Document<Ra> {
+  long id;
+  Region[R]<Content<R>> contentReg;
+  double timeRead;
+
+  Document(long id, Region<Content> cnt, double time) {
+    this.id = id; 
+    this.contentReg = cnt; 
+    this.timeRead = time;
+  }
+}
+class Content<Ra> {
+  string<Ra> content;
+  List<Ra,Ra><Document<Ra>> dependents;
+
+  Content(string cnt, List<Document> deps) {
+    this.content = cnt;
+    this.dependents = deps;
+  }
+}
+
+Document<Rma> <Rma>mkDocTree(long id) {
+  let string<Rma> inp = readFile(id);
+  let Func<void,Content> f = \_ -> new Content(inp,null);
+  let Region<Content> cntRgn = new Region<Content>(f);
+  letregion {
+    let List<long> depIds = parseDependents(inp);
+    openalloc cntRgn withroot cnt {
+      let List<Document> deps = 
+        depIds.map(\depId -> mkDocTree(depId));
+      cnt.dependents = deps;
+    }
+  }
+  return new Document(id,cntReg,System.getUnixTime());
+}

@@ -42,6 +42,7 @@ class ListActor {
         while(count < BUFFER_SIZE) {
           let Region<ItemList> itemListRgn = _list.removeAtAndGet(0);
           itemListRgn.free();
+          count = count + 1;
         }
       }
     }
