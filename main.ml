@@ -33,7 +33,7 @@ let makeClassTable ks =
            CT.add x k ct
          end) ks ct
 
-let _ =
+let main _ =
   let files = ref [] in
   Arg.parse
     [("-debug",
@@ -79,4 +79,9 @@ let _ =
         end
     with
       e -> close_in channel; raise e
-  end !files
+  end !files;;
+
+let t1 = Sys.time() in
+let _ = main () in
+let t2 = Sys.time() in
+  Printf.printf "Execution time: %fs\n" (t2 -. t1)

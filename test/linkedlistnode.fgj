@@ -1,0 +1,10 @@
+class LinkedListNode<'a extends Object>  extends Object  {
+    'a val;
+    LinkedListNode<'a>  prev;
+    LinkedListNode<'a>  next;
+    LinkedListNode('a val) {
+        this.val = val;
+        this.prev = Null;
+        this.next = new LinkedListNode<'a>(val);
+    }
+}

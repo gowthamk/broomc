@@ -25,8 +25,7 @@ class RegionJoinVertex<TInput1 extends ICloneable,
 
   void onReceive(Message<TTime, TInput1> message)
   {
-    let Func<void,Buffer<TTime, TOutput>> f = 
-        \_ -> new Buffer<TTime, TOutput>(outputRegion, message.time);
+    let Func<void,Buffer<TTime, TOutput>> f = \_ -> new Buffer<TTime, TOutput>();
     let Region<Buffer<TTime, TOutput>> outputRegion = 
             new Region<Buffer<TTime, TOutput>>(f);
     int outputOffset = 0;
